@@ -1,64 +1,103 @@
 // main entry point for the widget; all props will come in from here.
 import classnames from "classnames";
-import * as dateFns from "date-fns";
 import { ReactElement, createElement, useMemo } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CalendarContainerProps } from "../typings/CalendarProps";
 import { constructWrapperStyle } from "./utils/utils";
-import "../src/components/ui/Calendar.scss";
-import { format } from 'date-fns';
-import { startOfWeek } from "date-fns";
+
+import { format, startOfWeek } from 'date-fns';
+import * as dateFns from "date-fns";
 
 
 
 // Event content is customized based on event type 
+// const CustomEvent = ({ event }: { event: CalEvent }) => {
+//   const { type, title, location, start, end, to, reservation } = event;
+
+//   const renderByType = () => {
+//     switch (type) {
+//       case 'competition':
+//         return (
+//           <div className="competition-event">
+//             <strong>{title}</strong>
+//           </div>
+//         );
+//       case 'overnight':
+//         return (
+//           <div className="overnight-event">
+//             <strong>{title}</strong>
+//             <p>{location}</p>
+//           </div>
+//         );
+//       case 'activity':
+//         return (
+//           <div className="activity-event">
+//             <strong>{title}</strong>
+//             <p>
+//             {start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })} - 
+//             {end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}
+//             </p>
+//           </div>
+//         );
+//       case 'timeslot':
+//         return (
+//           <div className="timeslot-event">
+//             <strong>{title}</strong>
+//             <p>{start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}</p>
+//           </div>
+//         );
+//       case 'transit':
+//         return (
+//           <div className="transit-event">
+//             <strong>{reservation} {title} from {location} to {to}</strong>
+//           </div>
+//         );
+//       default:
+//         return (
+//           <div className="default-event">
+//             <strong>{title}</strong>
+//             <p>{location}</p>
+//             <p> {start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })} - 
+//             {end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}</p>
+//           </div>
+//         );
+//     }
+//   };
+
+//   return renderByType();
+// };
 const CustomEvent = ({ event }: { event: CalEvent }) => {
-  const { type, title, location, start, end, to, reservation } = event;
+  const { type, title, location, start, end, destination, reservation } = event;
 
   const renderByType = () => {
     switch (type) {
-      case 'competition':
-        return (
-          <div className="competition-event">
-            <strong>{title}</strong>
-          </div>
-        );
       case 'overnight':
         return (
           <div className="overnight-event">
             <strong>{title}</strong>
-            <p style={{ fontSize: "0.85em", color:"black" }}>{location}</p>
+            <p>{location}</p>
           </div>
         );
-      case 'activity':
-        return (
-          <div className="activity-event">
-            <strong>{title}</strong>
-            <p style={{ fontSize: "0.85em", color:"black" }}>
-            {start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })} - 
-            {end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}
-            </p>
-          </div>
-        );
-      case 'timeslot':
-        return (
-          <div className="timeslot-event">
-            <strong>{title}</strong>
-            <p style={{ fontSize: "0.85em", color:"black" }}>{start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}</p>
-          </div>
-        );
+    //   case 'timeslot':
+    //     return (
+    //       <div className="timeslot-event">
+    //         <strong>{title}</strong>
+    //         <p>{start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}</p>
+    //       </div>
+    //     );
       case 'transit':
         return (
           <div className="transit-event">
-            <strong>{reservation} {title} from {location} to {to}</strong>
+            <strong>{reservation} {title} from {location}{destination}</strong>
+            <p> {start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })} - 
+            {end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}</p>
           </div>
         );
       default:
         return (
           <div className="default-event">
             <strong>{title}</strong>
-            <p style={{ fontSize: "0.85em", color:"black" }}>{location}</p>
             <p> {start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })} - 
             {end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}</p>
           </div>
@@ -90,7 +129,7 @@ interface CalEvent {
     location?: string; 
     fontColor?: string;
     backgroundColor?: string;
-    to?: string;
+    destination?: string;
     reservation?: string;
 }
 
@@ -116,9 +155,11 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         const location = props.locationAttribute?.get(item).value ?? "";
         const reservation = props.transitReservationAttribute?.get(item).value ?? "";
         const type = props.eventTypeAttribute?.get(item).value ?? "";
-        const to = props.destinationAttribute?.get(item).value ?? "";
+        const destination = props.destinationAttribute?.get(item).value
+            ? ` to ${props.destinationAttribute.get(item).value}`
+            : "";
 
-        return { title, start, end, fontColor, backgroundColor, allDay, location, to, type, reservation }; 
+        return { title, start, end, fontColor, backgroundColor, allDay, location, destination, type, reservation }; 
     });
 
     const viewsOption: Array<"month" | "week" | "work_week" | "day" | "agenda"> =
@@ -197,16 +238,31 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         const dayLetter = format(date, 'EEEEE'); // first letter of the weekday, ie. "M"
         const dayNumber = format(date, 'd');     // day of the month, ie. "3"
         return (
-            <div style={{ textAlign: 'center' }}>
-                <div style={{ borderBottom: "1px solid #ddd", padding: '8px' }}>{dayLetter}</div>
-                <div style={{ color:"black", fontWeight:700, padding: '8px' }}>{dayNumber}</div>
+            <div className="custom-week-header">
+                <div className="custom-week-header-letter">{dayLetter}</div>
+                <div className="custom-week-header-number">{dayNumber}</div>
             </div>
         );
     };
 
+    // const min = useMemo(() => {
+    //     if (events.length === 0) return new Date(1970, 0, 1, 8, 0);
+    //     const hours = events.map(e => e.start.getHours());
+    //     const earliest = Math.max(Math.min(...hours) - 1, 0);
+    //     console.log("Min time:", earliest.toString());
+    //     return new Date(1970, 0, 1, earliest, 0);
+    // }, [events]);
+
+    // const max = useMemo(() => {
+    //     if (events.length === 0) return new Date(1970, 0, 1, 18, 0);
+    //     const hours = events.map(e => e.end.getHours());
+    //     const latest = Math.min(Math.max(...hours) + 1, 23);
+    //     return new Date(1970, 0, 1, latest, 0);
+    // }, [events]);
+
 
     return (
-        <div className={classnames("widget-calendar", className)} style={wrapperStyle}>
+        <div className={classnames(className)} style={wrapperStyle}>
             <Calendar<CalEvent>
                 localizer={localizer}
                 events={events}
@@ -225,6 +281,12 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                 formats={formats}
                 showAllEvents={true}
                 messages={messages}
+                step={60}// show 1-hour slots
+                timeslots={1} // number of subdivisions per step
+                // min={min} // start hour for week view 
+                // max={max} // end hour for week view
+                dayLayoutAlgorithm="no-overlap"
+                showMultiDayTimes={true}
             />
         </div>
     );
