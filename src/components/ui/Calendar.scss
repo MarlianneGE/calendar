@@ -1,0 +1,242 @@
+
+// removes times from left side of calendar
+.rbc-time-slot {
+    display: none; 
+}
+
+// remove gutter in header (left side) that goes above times (rbc-time-slot)
+.rbc-time-header-gutter {
+    display: none;
+}
+
+// remove cell on right side of header 
+.rbc-time-header {
+    margin-right: 0px !important;
+}
+
+// customizes column headers 
+.rbc-header {
+    color: #747474;
+    padding: 0px;
+}
+
+// remove bottom border in week view 
+.rbc-time-view .rbc-header {
+    border-bottom: none;    
+}
+
+// remove left border for header content in week view 
+.rbc-time-header-content {
+    border-left: none;
+}
+
+// Styling for each day cell in month view (ie. the number is centered and bold at the top of the cell)
+.rbc-date-cell {
+    text-align: center;
+    font-weight: 700;
+    padding: 8px; 
+}
+
+// add padding to headers in month view 
+.rbc-month-view .rbc-header {
+    padding: 8px;
+}
+
+// remove borders
+.rbc-header + .rbc-header {
+    border-left: none; 
+}
+.rbc-day-bg + .rbc-day-bg {
+    border-left: none;
+}
+
+// for week and month view buttons 
+// secondary for active view 
+.rbc-toolbar button.rbc-active {
+    border: 2px solid #1B7A11;
+    color: #1B7A11;
+    background-color: white;
+    border-radius: 20px !important;
+}
+// plain for inactive view
+.rbc-toolbar button {
+    color: black;
+    background-color: #F6F6FB;
+    border: 2px solid #F6F6FB; 
+    border-radius: 20px !important;
+}
+
+// remove gap on right side of events in week view 
+.rbc-day-slot .rbc-events-container {
+    margin-right: 0px;
+}
+
+// remove cell borders in week view 
+.rbc-time-content > * + * > * {
+    border-left: none;
+}
+.rbc-timeslot-group {
+    border-bottom: none; 
+}
+
+// add space between week and month view buttons 
+.rbc-btn-group > button:first-child:not(:last-child) {
+    margin-right: 8px;
+}
+
+// remove event border 
+.rbc-day-slot .rbc-event {
+    border: none; 
+}
+
+// hide default label for events 
+.rbc-day-slot .rbc-event-label {
+    display: none; 
+}
+
+// for week view, make everything show in smaller, non-scrolling view         ***** 
+.rbc-time-column {
+    max-height: 100%;
+    overflow: hidden;
+}
+
+// remove minimum height from all day section 
+.rbc-time-view .rbc-row {
+    min-height: 0px;
+}
+
+// background color for current date 
+.rbc-today {
+    background-color: #f8f8f8;
+}
+
+// remove border between all day events and timed events 
+.rbc-time-content {
+    border-top: none; 
+}
+
+// format back and next buttons
+.rbc-btn-group:first-of-type > button:last-child:not(:first-child) {   
+    font-size: xxx-large;
+    background: none;
+    border: none;
+}
+.rbc-btn-group:first-of-type > button:not(:first-child):not(:last-child) {
+    font-size: xxx-large;
+    background: none;
+    border: none;
+}
+
+// to make header show both divs in week view    
+.rbc-time-view .rbc-row {
+    min-height: fit-content;
+}
+
+// borders for week view 
+.rbc-time-view {
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    border-left: none;
+    border-right: none;
+}
+
+// remove side borders in month view 
+.rbc-month-view {
+    border-top: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    border-left: none;
+    border-right: none;
+}
+
+
+// make header contents span entire width so that border spans entire width 
+.rbc-header .rbc-button-link {
+    display: block;
+    width: 100%;
+}
+
+// remove bottom margin 
+.rbc-toolbar {
+    margin-bottom: 0px;
+}
+
+// change how out of range dates are shown -->  this hides header only 
+// .rbc-off-range {
+//     visibility: hidden;
+// }
+
+
+
+// hide the all day section 
+// .rbc-allday-cell,
+// .rbc-allday-events,
+// .rbc-row.rbc-allday {
+//     display: none !important;
+//     height: 0 !important;
+//     padding: 0 !important;
+//     margin: 0 !important;
+//     overflow: hidden;
+// }
+
+
+// Mendix had the following in the orginal version: 
+// @import "variables";
+
+// .widget-calendar {
+//     min-height: 350px;
+//     margin-bottom: $form-group-margin-bottom;
+//     user-select: none;
+//     -ms-user-select: none;
+
+//     .rbc-calendar {
+//         width: 100%;
+//         height: 100%;
+//     }
+
+//     .rbc-event {
+//         min-height: 20px;
+//     }
+
+//     .rbc-addons-dnd .rbc-addons-dnd-resize-ns-icon {
+//         cursor: row-resize;
+//     }
+
+//     .rbc-addons-dnd .rbc-addons-dnd-resize-ew-icon {
+//         cursor: col-resize;
+//     }
+
+//     .calendar-label {
+//         font-size: 16px;
+//     }
+
+//     .calendar-toolbar {
+//         display: flex;
+//         align-items: center;
+//         justify-content: space-between;
+//         flex-wrap: wrap;
+//         padding-bottom: 10px;
+//     }
+
+//     .rbc-current-time-indicator {
+//         background-color: $brand-danger;
+//     }
+
+//     .rbc-day-slot .rbc-event {
+//         border-top-color: $border-color-default;
+//         border-right-color: $border-color-default;
+//         border-bottom-color: $border-color-default;
+//         border-left-color: $border-color-default;
+//     }
+
+//     .rbc-off-range-bg {
+//         background-color: $color-default-lighter;
+//     }
+
+//     .rbc-today {
+//         background-color: $color-primary-lighter;
+//     }
+
+//     .rbc-event {
+//         background-color: $brand-primary;
+//     }
+// }

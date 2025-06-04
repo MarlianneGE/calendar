@@ -1,0 +1,47 @@
+{
+  "name": "calendar",
+  "widgetName": "Calendar",
+  "version": "1.0.0",
+  "description": "Calendar with events ",
+  "copyright": "© Mendix Technology BV 2022. All rights reserved.",
+  "author": "GoldenEarth",
+  "engines": {
+    "node": ">=16"
+  },
+  "license": "Apache-2.0",
+  "config": {
+    "projectPath": "../../GE-ClientDesignSystems-main",
+    "mendixHost": "http://localhost:8080",
+    "developmentPort": 3000
+  },
+  "packagePath": "goldenearth",
+  "scripts": {
+    "start": "pluggable-widgets-tools start:server",
+    "dev": "pluggable-widgets-tools start:web",
+    "build": "pluggable-widgets-tools build:web",
+    "lint": "pluggable-widgets-tools lint",
+    "lint:fix": "pluggable-widgets-tools lint:fix",
+    "prerelease": "npm run lint",
+    "release": "pluggable-widgets-tools release:web"
+  },
+  "devDependencies": {
+    "@mendix/pluggable-widgets-tools": "^10.15.0",
+    "@types/big.js": "^6.0.2",
+    "@types/react-big-calendar": "^1.16.1",
+    "mendix-client": "^7.15.8"
+  },
+  "dependencies": {
+    "classnames": "^2.2.6",
+    "react-big-calendar": "^1.18.0"
+  },
+  "resolutions": {
+    "react": "^18.2.0",
+    "@types/react": "^18.2.0",
+    "react-native": "0.72.7"
+  },
+  "overrides": {
+    "react": "^18.2.0",
+    "@types/react": "^18.2.0",
+    "react-native": "0.72.7"
+  }
+}

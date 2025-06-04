@@ -1,0 +1,232 @@
+// main entry point for the widget; all props will come in from here.
+import classnames from "classnames";
+import * as dateFns from "date-fns";
+import { ReactElement, createElement, useMemo } from "react";
+import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import { CalendarContainerProps } from "../typings/CalendarProps";
+import { constructWrapperStyle } from "./utils/utils";
+import "../src/components/ui/Calendar.scss";
+import { format } from 'date-fns';
+import { startOfWeek } from "date-fns";
+
+
+
+// Event content is customized based on event type 
+const CustomEvent = ({ event }: { event: CalEvent }) => {
+  const { type, title, location, start, end, to, reservation } = event;
+
+  const renderByType = () => {
+    switch (type) {
+      case 'competition':
+        return (
+          <div className="competition-event">
+            <strong>{title}</strong>
+          </div>
+        );
+      case 'overnight':
+        return (
+          <div className="overnight-event">
+            <strong>{title}</strong>
+            <p style={{ fontSize: "0.85em", color:"black" }}>{location}</p>
+          </div>
+        );
+      case 'activity':
+        return (
+          <div className="activity-event">
+            <strong>{title}</strong>
+            <p style={{ fontSize: "0.85em", color:"black" }}>
+            {start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })} - 
+            {end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}
+            </p>
+          </div>
+        );
+      case 'timeslot':
+        return (
+          <div className="timeslot-event">
+            <strong>{title}</strong>
+            <p style={{ fontSize: "0.85em", color:"black" }}>{start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}</p>
+          </div>
+        );
+      case 'transit':
+        return (
+          <div className="transit-event">
+            <strong>{reservation} {title} from {location} to {to}</strong>
+          </div>
+        );
+      default:
+        return (
+          <div className="default-event">
+            <strong>{title}</strong>
+            <p style={{ fontSize: "0.85em", color:"black" }}>{location}</p>
+            <p> {start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })} - 
+            {end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}</p>
+          </div>
+        );
+    }
+  };
+
+  return renderByType();
+};
+
+// make week view start on monday instead of sunday 
+const localizer = dateFnsLocalizer({
+    format: dateFns.format,
+    parse: dateFns.parse,
+    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }), 
+    getDay: dateFns.getDay,
+    locales: {}
+});
+
+
+
+interface CalEvent {
+    title: string;
+    start: Date;
+    end: Date;
+    allDay: boolean;
+    type: string;
+    // optional: 
+    location?: string; 
+    fontColor?: string;
+    backgroundColor?: string;
+    to?: string;
+    reservation?: string;
+}
+
+export default function MxCalendar(props: CalendarContainerProps): ReactElement {
+    const { class: className } = props;
+    const wrapperStyle = constructWrapperStyle(props);
+
+    const items = props.databaseDataSource?.items ?? [];
+
+    const events: CalEvent[] = items.map(item => {
+        const title =
+            props.titleType === "attribute" && props.titleAttribute
+                ? (props.titleAttribute.get(item).value ?? "")
+                : props.titleType === "expression" && props.titleExpression
+                  ? String(props.titleExpression.get(item) ?? "")
+                  : "Untitled Event";
+
+        const start = props.startAttribute?.get(item).value ?? new Date();
+        const end = props.endAttribute?.get(item).value ?? start;
+        const allDay = props.allDayAttribute?.get(item).value ?? false;
+        const fontColor = props.eventFontColor?.get(item).value;
+        const backgroundColor = props.eventBackgroundColor?.get(item).value;
+        const location = props.locationAttribute?.get(item).value ?? "";
+        const reservation = props.transitReservationAttribute?.get(item).value ?? "";
+        const type = props.eventTypeAttribute?.get(item).value ?? "";
+        const to = props.destinationAttribute?.get(item).value ?? "";
+
+        return { title, start, end, fontColor, backgroundColor, allDay, location, to, type, reservation }; 
+    });
+
+    const viewsOption: Array<"month" | "week" | "work_week" | "day" | "agenda"> =
+        props.view === "standard" ? ["week", "month"] : ["month", "week", "work_week", "day", "agenda"]; 
+
+
+    const eventPropGetter = (event: CalEvent) => {
+        return {
+            style: {
+                backgroundColor: event.backgroundColor,
+                color: event.fontColor
+            }
+        };
+    };
+
+    // formats 
+    const formats = useMemo(() => ({
+
+        // month view; 1 letter to represent day of the week in column headers 
+        weekdayFormat: (
+            date: Date,
+            culture: string | undefined,
+            localizer: ReturnType<typeof dateFnsLocalizer>
+        ) => localizer.format(date, "EEEEE", culture),
+
+        // format for the number representing the day of the month for each cell in month view 
+        dateFormat: (
+            date: Date,
+            culture: string | undefined,
+            localizer: ReturnType<typeof dateFnsLocalizer>
+        ) => localizer.format(date, 'd', culture),
+
+        // format for the title in week view 
+        dayRangeHeaderFormat: (
+            range: { start: Date; end: Date },
+            culture: string | undefined,
+            localizer: ReturnType<typeof dateFnsLocalizer>
+        ) => {
+            const { start, end } = range;
+
+            const sameMonth = start.getMonth() === end.getMonth();
+            const sameYear = start.getFullYear() === end.getFullYear();
+
+            if (sameMonth && sameYear) {
+                return (
+                    localizer.format(start, "MMMM d", culture) +
+                    " – " +
+                    localizer.format(end, "d, yyyy", culture)
+                );
+            } else if (sameYear) {
+                return (
+                    localizer.format(start, "MMMM d", culture) +
+                    " – " +
+                    localizer.format(end, "MMMM d, yyyy", culture)
+                );
+            } else {
+                return (
+                    localizer.format(start, "MMMM d, yyyy", culture) +
+                    " – " +
+                    localizer.format(end, "MMMM d, yyyy", culture)
+                );
+            }
+        }
+
+ 
+    }), []);
+
+    // messages  
+    const messages = useMemo(() => ({
+        previous: '‹', // or can use '\u2039'
+        next: '›' 
+    }), []);
+
+    // header for the week view 
+    const CustomWeekHeader = ({ date }: { date: Date }) => {
+        const dayLetter = format(date, 'EEEEE'); // first letter of the weekday, ie. "M"
+        const dayNumber = format(date, 'd');     // day of the month, ie. "3"
+        return (
+            <div style={{ textAlign: 'center' }}>
+                <div style={{ borderBottom: "1px solid #ddd", padding: '8px' }}>{dayLetter}</div>
+                <div style={{ color:"black", fontWeight:700, padding: '8px' }}>{dayNumber}</div>
+            </div>
+        );
+    };
+
+
+    return (
+        <div className={classnames("widget-calendar", className)} style={wrapperStyle}>
+            <Calendar<CalEvent>
+                localizer={localizer}
+                events={events}
+                defaultView={props.defaultView}
+                startAccessor={(event: CalEvent) => event.start}
+                endAccessor={(event: CalEvent) => event.end}
+                views={viewsOption}
+                allDayAccessor={(event: CalEvent) => event.allDay}
+                eventPropGetter={eventPropGetter}
+                components={{
+                    event: CustomEvent, 
+                    week: {
+                        header: CustomWeekHeader 
+                    }
+                }}
+                formats={formats}
+                showAllEvents={true}
+                messages={messages}
+            />
+        </div>
+    );
+}
+
