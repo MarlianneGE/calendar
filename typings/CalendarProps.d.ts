@@ -6,6 +6,8 @@
 import { CSSProperties } from "react";
 import { ActionValue, EditableValue, ListValue, ListAttributeValue, ListExpressionValue } from "mendix";
 
+export type FilterTypeEnum = "icons" | "eventInfo";
+
 export type TitleTypeEnum = "attribute" | "expression";
 
 export type ViewEnum = "standard" | "dashboard";
@@ -30,12 +32,12 @@ export interface CalendarContainerProps {
     style?: CSSProperties;
     tabIndex?: number;
     databaseDataSource?: ListValue;
+    filterType: FilterTypeEnum;
+    iconAttribute?: ListAttributeValue<string>;
     titleType: TitleTypeEnum;
     titleAttribute?: ListAttributeValue<string>;
     titleExpression?: ListExpressionValue<string>;
     locationAttribute?: ListAttributeValue<string>;
-    destinationAttribute?: ListAttributeValue<string>;
-    transitReservationAttribute?: ListAttributeValue<string>;
     eventTypeAttribute?: ListAttributeValue<string>;
     allDayAttribute?: ListAttributeValue<boolean>;
     startAttribute?: ListAttributeValue<Date>;
@@ -74,12 +76,12 @@ export interface CalendarPreviewProps {
     renderMode: "design" | "xray" | "structure";
     translate: (text: string) => string;
     databaseDataSource: {} | { caption: string } | { type: string } | null;
+    filterType: FilterTypeEnum;
+    iconAttribute: string;
     titleType: TitleTypeEnum;
     titleAttribute: string;
     titleExpression: string;
     locationAttribute: string;
-    destinationAttribute: string;
-    transitReservationAttribute: string;
     eventTypeAttribute: string;
     allDayAttribute: string;
     startAttribute: string;
