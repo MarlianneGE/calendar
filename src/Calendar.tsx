@@ -5,7 +5,7 @@ import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CalendarContainerProps } from "../typings/CalendarProps";
 import { constructWrapperStyle } from "./utils/utils";
-
+import { useState } from "react";
 import { format, startOfWeek } from 'date-fns';
 import * as dateFns from "date-fns";
 
@@ -19,88 +19,25 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 
-// Event content is customized based on event type 
-// const CustomEvent = ({ event }: { event: CalEvent }) => {
-//   const { type, title, location, start, end, to, reservation } = event;
-
-//   const renderByType = () => {
-//     switch (type) {
-//       case 'competition':
-//         return (
-//           <div className="competition-event">
-//             <strong>{title}</strong>
-//           </div>
-//         );
-//       case 'overnight':
-//         return (
-//           <div className="overnight-event">
-//             <strong>{title}</strong>
-//             <p>{location}</p>
-//           </div>
-//         );
-//       case 'activity':
-//         return (
-//           <div className="activity-event">
-//             <strong>{title}</strong>
-//             <p>
-//             {start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })} - 
-//             {end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}
-//             </p>
-//           </div>
-//         );
-//       case 'timeslot':
-//         return (
-//           <div className="timeslot-event">
-//             <strong>{title}</strong>
-//             <p>{start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}</p>
-//           </div>
-//         );
-//       case 'transit':
-//         return (
-//           <div className="transit-event">
-//             <strong>{reservation} {title} from {location} to {to}</strong>
-//           </div>
-//         );
-//       default:
-//         return (
-//           <div className="default-event">
-//             <strong>{title}</strong>
-//             <p>{location}</p>
-//             <p> {start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })} - 
-//             {end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}</p>
-//           </div>
-//         );
-//     }
-//   };
-
-//   return renderByType();
-// };
-// const CustomEvent = ({ event }: { event: CalEvent }) => {
-//   const { title, location, start, end, allDay } = event;                  // add filter attribute here and add logic below for icons 
-
-//   const renderByType = () => {
-//     switch (allDay) {
-//       case true:
-//         return (
-//           <div className="overnight-event">
-//             <strong>{title}</strong>
-//             <p>{location}</p>
-//           </div>
-//         );
-//       default:
-//         return (
-//           <div className="default-event">
-//             <strong>{title}</strong>
-//             <p> {start.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })} - 
-//             {end.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: false })}</p>
-//           </div>
-//         );
-//     }
-//   };
-
-//   return renderByType();
-// };
-const CustomEvent = ({ event }: { event: CalEvent }) => {
+// Event content is customized based on icons or eventInfo and allDay or timed events and week or month view 
+const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
+     const { title, location, start, end, allDay } = event;
+    return allDay ? (
+        <div className="allDay-event">
+            <strong>{title}</strong>
+            <p>{location}</p>
+        </div>
+    ) : (
+        <div className="timed-event">
+            <strong>{title}</strong>
+            <p>
+                {start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false })} -{" "}
+                {end.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false })}
+            </p>
+        </div>
+    );
+};
+const CustomMonthEvent = ({ event }: { event: CalEvent }) => {
     const { title, location, start, end, allDay, filter, iconName } = event;
 
     const iconMap: { [key: string]: any } = {
@@ -122,16 +59,15 @@ const CustomEvent = ({ event }: { event: CalEvent }) => {
         ) : renderInfo(); // fallback to event info if icon isn't found
     };
 
-
     // show event info 
     const renderInfo = () => {
         return allDay ? (
-            <div className="overnight-event">
+            <div className="allDay-event">
                 <strong>{title}</strong>
                 <p>{location}</p>
             </div>
         ) : (
-            <div className="default-event">
+            <div className="timed-event">
                 <strong>{title}</strong>
                 <p>
                     {start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false })} -{" "}
@@ -145,15 +81,13 @@ const CustomEvent = ({ event }: { event: CalEvent }) => {
 };
 
 
-// make week view start on monday instead of sunday 
 const localizer = dateFnsLocalizer({
     format: dateFns.format,
     parse: dateFns.parse,
-    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }), 
+    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }), // make week view start on monday instead of sunday 
     getDay: dateFns.getDay,
     locales: {}
 });
-
 
 
 interface CalEvent {
@@ -162,7 +96,7 @@ interface CalEvent {
     end: Date;
     allDay: boolean;
     type: string;
-    filter: "icons" | "eventInfo";
+    filter: string;
     iconName: string;
     // optional: 
     location?: string; 
@@ -172,6 +106,7 @@ interface CalEvent {
 
 export default function MxCalendar(props: CalendarContainerProps): ReactElement {
     const { class: className } = props;
+    const [currentView, setCurrentView] = useState(props.defaultView);
     const wrapperStyle = constructWrapperStyle(props);
 
     const items = props.databaseDataSource?.items ?? [];
@@ -192,7 +127,9 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         const location = props.locationAttribute?.get(item).value ?? "";
         const type = props.eventTypeAttribute?.get(item).value ?? "";
         const iconName = props.iconAttribute?.get(item).value ?? "";
-        const filter = props.filterType === "icons" ? "icons" : "eventInfo";
+        const rawFilter = props.filterType?.get(item)?.value;
+        const filter = rawFilter ? rawFilter.toString().toLowerCase() : "";
+
 
         return { title, start, end, fontColor, backgroundColor, allDay, location, type, filter, iconName }; 
     });
@@ -202,9 +139,11 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
 
 
     const eventPropGetter = (event: CalEvent) => {
+        const shouldApplyBackground = currentView === "week" || (currentView === "month" && event.filter === "eventinfo");
+
         return {
             style: {
-                backgroundColor: event.filter === "eventInfo" ? event.backgroundColor : "transparent",
+                backgroundColor: shouldApplyBackground ? event.backgroundColor : "transparent",
                 color: event.fontColor
             }
         };
@@ -280,21 +219,6 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         );
     };
 
-    // const min = useMemo(() => {
-    //     if (events.length === 0) return new Date(1970, 0, 1, 8, 0);
-    //     const hours = events.map(e => e.start.getHours());
-    //     const earliest = Math.max(Math.min(...hours) - 1, 0);
-    //     console.log("Min time:", earliest.toString());
-    //     return new Date(1970, 0, 1, earliest, 0);
-    // }, [events]);
-
-    // const max = useMemo(() => {
-    //     if (events.length === 0) return new Date(1970, 0, 1, 18, 0);
-    //     const hours = events.map(e => e.end.getHours());
-    //     const latest = Math.min(Math.max(...hours) + 1, 23);
-    //     return new Date(1970, 0, 1, latest, 0);
-    // }, [events]);
-
 
     return (
         <div className={classnames(className)} style={wrapperStyle}>
@@ -308,19 +232,19 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                 allDayAccessor={(event: CalEvent) => event.allDay}
                 eventPropGetter={eventPropGetter}
                 components={{
-                    event: CustomEvent, 
                     week: {
-                        header: CustomWeekHeader 
-                    }
+                        header: CustomWeekHeader,
+                        event: CustomWeekEvent
+                    },
+                    month: {
+                        event: CustomMonthEvent
+                    },
                 }}
                 formats={formats}
                 showAllEvents={true}
                 messages={messages}
-                step={60}// show 1-hour slots
-                timeslots={1} // number of subdivisions per step
-                // min={min} // start hour for week view 
-                // max={max} // end hour for week view
                 dayLayoutAlgorithm="no-overlap"
+                onView={(view: "month" | "week" | "work_week" | "day" | "agenda") => setCurrentView(view)}
             />
         </div>
     );

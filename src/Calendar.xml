@@ -14,13 +14,12 @@
                     <caption>Events</caption>
                     <description />
                 </property>
-                <property key="filterType" type="enumeration" defaultValue="eventInfo">
-                    <caption>Filter type</caption>
-                    <description>Choose between showing icons for events or showing event title and time</description>
-                    <enumerationValues>
-                        <enumerationValue key="icons">Icons</enumerationValue>
-                        <enumerationValue key="eventInfo">Event Info</enumerationValue>
-                    </enumerationValues>
+                <property key="filterType" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>Filter/Display Type attribute</caption>
+                    <description>Select an attribute that contains the filter or display type</description>
+                    <attributeTypes>
+                        <attributeType name="Enum" />
+                    </attributeTypes>
                 </property>
                 <property key="iconAttribute" type="attribute" dataSource="databaseDataSource" required="false">
                     <caption>Icon attribute</caption>
