@@ -5,7 +5,6 @@ import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CalendarContainerProps } from "../typings/CalendarProps";
 import { constructWrapperStyle } from "./utils/utils";
-import { useState } from "react";
 import { format, startOfWeek } from 'date-fns';
 import * as dateFns from "date-fns";
 
@@ -104,9 +103,12 @@ interface CalEvent {
     backgroundColor?: string;
 }
 
+
 export default function MxCalendar(props: CalendarContainerProps): ReactElement {
     const { class: className } = props;
-    const [currentView, setCurrentView] = useState(props.defaultView);
+
+    const currentView = props.viewAttribute?.value as typeof props.defaultView;
+
     const wrapperStyle = constructWrapperStyle(props);
 
     const items = props.databaseDataSource?.items ?? [];
@@ -165,39 +167,6 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
             culture: string | undefined,
             localizer: ReturnType<typeof dateFnsLocalizer>
         ) => localizer.format(date, 'd', culture),
-
-        // format for the title in week view 
-        dayRangeHeaderFormat: (
-            range: { start: Date; end: Date },
-            culture: string | undefined,
-            localizer: ReturnType<typeof dateFnsLocalizer>
-        ) => {
-            const { start, end } = range;
-
-            const sameMonth = start.getMonth() === end.getMonth();
-            const sameYear = start.getFullYear() === end.getFullYear();
-
-            if (sameMonth && sameYear) {
-                return (
-                    localizer.format(start, "MMMM d", culture) +
-                    " – " +
-                    localizer.format(end, "d, yyyy", culture)
-                );
-            } else if (sameYear) {
-                return (
-                    localizer.format(start, "MMMM d", culture) +
-                    " – " +
-                    localizer.format(end, "MMMM d, yyyy", culture)
-                );
-            } else {
-                return (
-                    localizer.format(start, "MMMM d, yyyy", culture) +
-                    " – " +
-                    localizer.format(end, "MMMM d, yyyy", culture)
-                );
-            }
-        }
-
  
     }), []);
 
@@ -225,7 +194,6 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
             <Calendar<CalEvent>
                 localizer={localizer}
                 events={events}
-                defaultView={props.defaultView}
                 startAccessor={(event: CalEvent) => event.start}
                 endAccessor={(event: CalEvent) => event.end}
                 views={viewsOption}
@@ -243,8 +211,17 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                 formats={formats}
                 showAllEvents={true}
                 messages={messages}
-                dayLayoutAlgorithm="no-overlap"
-                onView={(view: "month" | "week" | "work_week" | "day" | "agenda") => setCurrentView(view)}
+
+                toolbar={false}
+                view={currentView ?? props.defaultView}
+                date={props.dateAttribute?.value ?? new Date()}
+                onView={(newView: "month" | "week" ) => {
+                    props.viewAttribute?.setValue?.(newView);
+                }}
+                onNavigate={(newDate: Date) => {
+                    props.dateAttribute?.setValue?.(newDate);
+                }}
+
             />
         </div>
     );

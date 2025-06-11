@@ -14,6 +14,20 @@
                     <caption>Events</caption>
                     <description />
                 </property>
+                <property key="dateAttribute" type="attribute" required="false">
+                    <caption>Date attribute</caption>
+                    <description>The date that should be shown in the view</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime" />
+                    </attributeTypes>
+                </property>
+                <property key="viewAttribute" type="attribute" required="false">
+                    <caption>View attribute</caption>
+                    <description>The desired view, either week or month</description>
+                    <attributeTypes>
+                        <attributeType name="Enum" />
+                    </attributeTypes>
+                </property>
                 <property key="filterType" type="attribute" dataSource="databaseDataSource" required="false">
                     <caption>Filter/Display Type attribute</caption>
                     <description>Select an attribute that contains the filter or display type</description>
@@ -131,13 +145,6 @@
                         <enumerationValue key="work_week">(Work week)</enumerationValue>
                         <enumerationValue key="agenda">(Agenda)</enumerationValue>
                     </enumerationValues>
-                </property>
-                <property key="startDateAttribute" type="attribute" required="false">
-                    <caption>Start date attribute</caption>
-                    <description>The start date that should be shown in the view</description>
-                    <attributeTypes>
-                        <attributeType name="DateTime" />
-                    </attributeTypes>
                 </property>
             </propertyGroup>
         </propertyGroup>
