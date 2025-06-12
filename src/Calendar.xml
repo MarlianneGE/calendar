@@ -30,7 +30,7 @@
                 </property>
                 <property key="filterType" type="attribute" dataSource="databaseDataSource" required="false">
                     <caption>Filter/Display Type attribute</caption>
-                    <description>Select an attribute that contains the filter or display type</description>
+                    <description>Select an attribute that contains the display type of Icons or EventInfo</description>
                     <attributeTypes>
                         <attributeType name="Enum" />
                     </attributeTypes>

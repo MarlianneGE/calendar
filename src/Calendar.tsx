@@ -103,6 +103,46 @@ interface CalEvent {
     backgroundColor?: string;
 }
 
+// icons need to show on each day of a multiday event 
+function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
+    const expandedEvents: CalEvent[] = [];
+    
+    events.forEach(event => {
+        const startDate = new Date(event.start);
+        const endDate = new Date(event.end);
+
+        const isMultiDay = startDate.toDateString() !== endDate.toDateString();
+        const shouldChunk = event.filter === "icons" && view === "month";
+
+        // chunk events that are more than 1 day when filter is icons
+        if (isMultiDay && shouldChunk) {
+            let currentDate = new Date(startDate);
+
+            while (currentDate < endDate) {
+                const chunkStart = new Date(currentDate);
+                chunkStart.setHours(0, 0, 0, 0); // time doesn't matter since multi-day events are shown in all day section and this will not change the displayed time 
+
+                const chunkEnd = new Date(currentDate);
+                chunkEnd.setHours(23, 59, 59, 999); // time doesn't matter since multi-day events are shown in all day section and this will not change the displayed time 
+
+                expandedEvents.push({
+                    ...event,
+                    start: chunkStart,
+                    end: chunkEnd,
+                });
+
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+        } else {
+            // if single-day events or if filter is EventInfo then don't chunk  
+            expandedEvents.push(event);
+        }
+    });
+
+    return expandedEvents;
+}
+
+
 
 export default function MxCalendar(props: CalendarContainerProps): ReactElement {
     const { class: className } = props;
@@ -113,7 +153,7 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
 
     const items = props.databaseDataSource?.items ?? [];
 
-    const events: CalEvent[] = items.map(item => {
+    const rawEvents: CalEvent[] = items.map(item => {
         const title =
             props.titleType === "attribute" && props.titleAttribute
                 ? (props.titleAttribute.get(item).value ?? "")
@@ -135,6 +175,8 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
 
         return { title, start, end, fontColor, backgroundColor, allDay, location, type, filter, iconName }; 
     });
+
+    const events = expandMultiDayEvents(rawEvents, currentView);
 
     const viewsOption: Array<"month" | "week" | "work_week" | "day" | "agenda"> =
         props.view === "standard" ? ["week", "month"] : ["month", "week", "work_week", "day", "agenda"]; 
