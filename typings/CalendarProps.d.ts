@@ -31,6 +31,7 @@ export interface CalendarContainerProps {
     tabIndex?: number;
     databaseDataSource?: ListValue;
     dateAttribute?: EditableValue<Date>;
+    clickedDate?: EditableValue<Date>;
     viewAttribute?: EditableValue<string>;
     filterType?: ListAttributeValue<string>;
     iconAttribute?: ListAttributeValue<string>;
@@ -48,10 +49,8 @@ export interface CalendarContainerProps {
     editable: EditableEnum;
     enableCreate: boolean;
     defaultView: DefaultViewEnum;
-    eventDataAttribute?: EditableValue<string>;
     onClickEvent?: ActionValue;
-    onCreateEvent?: ActionValue;
-    onChange?: ActionValue;
+    onClickEmpty?: ActionValue;
     widthUnit: WidthUnitEnum;
     width: number;
     heightUnit: HeightUnitEnum;
@@ -76,6 +75,7 @@ export interface CalendarPreviewProps {
     translate: (text: string) => string;
     databaseDataSource: {} | { caption: string } | { type: string } | null;
     dateAttribute: string;
+    clickedDate: string;
     viewAttribute: string;
     filterType: string;
     iconAttribute: string;
@@ -93,10 +93,8 @@ export interface CalendarPreviewProps {
     editable: EditableEnum;
     enableCreate: boolean;
     defaultView: DefaultViewEnum;
-    eventDataAttribute: string;
     onClickEvent: {} | null;
-    onCreateEvent: {} | null;
-    onChange: {} | null;
+    onClickEmpty: {} | null;
     widthUnit: WidthUnitEnum;
     width: number | null;
     heightUnit: HeightUnitEnum;

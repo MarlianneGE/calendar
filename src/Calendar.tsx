@@ -230,6 +230,30 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         );
     };
 
+    const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
+        // Set clicked date attribute in Mendix 
+        if (props.clickedDate && props.clickedDate.setValue) {
+            props.clickedDate.setValue(slotInfo.start); 
+        }
+
+        // Execute the onClickEmpty action
+        if (props.onClickEmpty && props.onClickEmpty.canExecute) {
+            props.onClickEmpty.execute();
+        }
+    };
+
+    const handleSelectEvent = (event: CalEvent) => {
+        // Set clicked date attribute in Mendix
+        if (props.clickedDate && props.clickedDate.setValue) {
+            props.clickedDate.setValue(event.start); 
+        }
+
+        // Execute the onClickEvent action
+        if (props.onClickEvent && props.onClickEvent.canExecute) {
+            props.onClickEvent.execute();
+        }
+    };
+
 
     return (
         <div className={classnames(className)} style={wrapperStyle}>
@@ -263,7 +287,9 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                 onNavigate={(newDate: Date) => {
                     props.dateAttribute?.setValue?.(newDate);
                 }}
-
+                selectable={true}
+                onSelectSlot={handleSelectSlot} // empty space on calendar 
+                onSelectEvent={handleSelectEvent}
             />
         </div>
     );

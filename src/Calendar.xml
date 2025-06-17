@@ -21,6 +21,13 @@
                         <attributeType name="DateTime" />
                     </attributeTypes>
                 </property>
+                <property key="clickedDate" type="attribute" required="false">
+                    <caption>Clicked Date</caption>
+                    <description>The date that was clicked. Used to pass to onClick action.</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime" />
+                    </attributeTypes>
+                </property>
                 <property key="viewAttribute" type="attribute" required="false">
                     <caption>View attribute</caption>
                     <description>The desired view, either week or month</description>
@@ -149,24 +156,13 @@
             </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Events">
-            <property key="eventDataAttribute" type="attribute" required="false">
-                <caption>Event data attribute</caption>
-                <description>The attribute to store received raw data</description>
-                <attributeTypes>
-                    <attributeType name="String" />
-                </attributeTypes>
-            </property>
             <property key="onClickEvent" type="action" required="false">
                 <caption>On click action</caption>
                 <description />
             </property>
-            <property key="onCreateEvent" type="action" required="false">
-                <caption>On create action</caption>
-                <description>The create event is triggered when a time slot is selected, and the 'Enable create' property is set to 'true'</description>
-            </property>
-            <property key="onChange" type="action" required="false">
-                <caption>On change action</caption>
-                <description>The change event is triggered on moving/dragging an item or changing the start or end time of by resizing an item</description>
+            <property key="onClickEmpty" type="action" required="false">
+                <caption>On click empty</caption>
+                <description>Triggered when an empty time slot is selected</description>
             </property>
         </propertyGroup>
         <propertyGroup caption="Dimensions">
