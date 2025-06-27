@@ -26,7 +26,12 @@ const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
         </div>
     );
 };
-const CustomMonthEvent = ({ event }: { event: CalEvent & { icons?: string[] } }) => {
+interface CustomMonthEventProps {
+    event: CalEvent & { icons?: string[] };
+    onShowMoreClick?: (date: Date) => void;
+}
+
+const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => {
     if (event.filter === "icons" && event.icons && event.icons.length > 0) {
         const maxToShow = 3;
         const visible = event.icons.slice(0, maxToShow);
@@ -34,29 +39,30 @@ const CustomMonthEvent = ({ event }: { event: CalEvent & { icons?: string[] } })
 
         return (
             <div className="icon-row">
-                {visible.map((color, i) => (
-                    <span
-                        key={i}
-                        className="color-circle"
-                        style={{ backgroundColor: color }}
-                        title={color}
-                    />
-                ))}
+                <div className="circle-row">
+                    {visible.map((color, i) => (
+                        <span
+                            key={i}
+                            className="color-circle"
+                            style={{ backgroundColor: color }}
+                            title={color}
+                        />
+                    ))}
+                </div>
 
                 {hiddenCount > 0 && (
-                    <span
-                        className="show-more"
-                        title={`+${hiddenCount} more`}
-                        onClick={(e) => {
-                            e.stopPropagation(); // prevent navigating to day view
-                            const customEvent = new CustomEvent("customShowMore", {
-                                detail: { date: event.start }
-                            });
-                            window.dispatchEvent(customEvent);
-                        }}
-                    >
-                        +{hiddenCount}
-                    </span>
+                    <div className="show-more-row">
+                        <span
+                            className="show-more"
+                            title={`+${hiddenCount} more`}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onShowMoreClick?.(event.start);
+                            }}
+                        >
+                            +{hiddenCount}
+                        </span>
+                    </div>
                 )}
             </div>
         );
@@ -330,9 +336,14 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                         header: CustomWeekHeader,
                         event: CustomWeekEvent
                     },
-                    month: {
-                        event: CustomMonthEvent
-                    },
+                month: {
+                    event: (calendarEventProps: { event: CalEvent }) => (
+                    <CustomMonthEvent
+                        {...calendarEventProps}
+                        onShowMoreClick={(date) => onShowMore([], date)}
+                    />
+                    )
+                },
                 }}
                 formats={formats}
                 toolbar={false}
