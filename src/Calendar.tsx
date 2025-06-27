@@ -1,6 +1,6 @@
 // main entry point for the widget; all props will come in from here.
 import classnames from "classnames";
-import { ReactElement, createElement, useMemo } from "react";
+import { ReactElement, createElement, useMemo, useEffect } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CalendarContainerProps } from "../typings/CalendarProps";
@@ -27,11 +27,14 @@ const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
     );
 };
 const CustomMonthEvent = ({ event }: { event: CalEvent & { icons?: string[] } }) => {
-    // If it's an icon row, render colored circles instead
     if (event.filter === "icons" && event.icons && event.icons.length > 0) {
+        const maxToShow = 3;
+        const visible = event.icons.slice(0, maxToShow);
+        const hiddenCount = event.icons.length - visible.length;
+
         return (
             <div className="icon-row">
-                {event.icons.map((color, i) => (
+                {visible.map((color, i) => (
                     <span
                         key={i}
                         className="color-circle"
@@ -39,11 +42,26 @@ const CustomMonthEvent = ({ event }: { event: CalEvent & { icons?: string[] } })
                         title={color}
                     />
                 ))}
+
+                {hiddenCount > 0 && (
+                    <span
+                        className="show-more"
+                        title={`+${hiddenCount} more`}
+                        onClick={(e) => {
+                            e.stopPropagation(); // prevent navigating to day view
+                            const customEvent = new CustomEvent("customShowMore", {
+                                detail: { date: event.start }
+                            });
+                            window.dispatchEvent(customEvent);
+                        }}
+                    >
+                        +{hiddenCount}
+                    </span>
+                )}
             </div>
         );
     }
 
-    // If it's an eventInfo row
     if (event.filter === "eventinfo") {
         return (
             <div className="event-info">
@@ -54,6 +72,7 @@ const CustomMonthEvent = ({ event }: { event: CalEvent & { icons?: string[] } })
 
     return null;
 };
+
 
 
 function groupIconEventsByDay(events: CalEvent[], view: string): CalEvent[] {
@@ -283,6 +302,18 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         // Prevent default navigation to day view
         return false;
     }
+
+    useEffect(() => {
+        const handler = (e: any) => {
+            const date = e.detail?.date;
+            if (!date) return;
+            onShowMore([], date);
+        };
+
+        window.addEventListener("customShowMore", handler);
+        return () => window.removeEventListener("customShowMore", handler);
+    }, []);
+
   
     return (
         <div className={classnames(className)} style={wrapperStyle}>
