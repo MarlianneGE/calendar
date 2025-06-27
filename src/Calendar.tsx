@@ -8,15 +8,6 @@ import { constructWrapperStyle } from "./utils/utils";
 import { format, startOfWeek } from 'date-fns';  
 import * as dateFns from "date-fns";
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-    faHouse,
-    faHeartPulse,
-    faTrophy,
-    faClock,
-    faPlane
-} from "@fortawesome/free-solid-svg-icons";
-
 // Event content is customized based on icons or eventInfo and allDay or timed events and week or month view 
 const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
      const { title, location, start, end, allDay } = event;
@@ -35,39 +26,71 @@ const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
         </div>
     );
 };
-const CustomMonthEvent = ({ event }: { event: CalEvent }) => {
-    const { iconName, title, filter, } = event; //title, location, start, end, allDay, filter, 
-
-    const iconMap: { [key: string]: any } = {
-        "house": faHouse,
-        "heart-pulse": faHeartPulse,
-        "trophy": faTrophy,
-        "clock": faClock,
-        "plane": faPlane
-    };
-
-    // show icon  
-    const renderIcon = () => {
-        const icon = iconMap[iconName];
-
-        return icon ? (
-            <span className="custom-icon">
-                <FontAwesomeIcon icon={icon} />
-            </span>
-        ) : renderInfo(); // fallback to event info if icon isn't found
-    };
-
-    // show event info 
-    const renderInfo = () => {
+const CustomMonthEvent = ({ event }: { event: CalEvent & { icons?: string[] } }) => {
+    // If it's an icon row, render colored circles instead
+    if (event.filter === "icons" && event.icons && event.icons.length > 0) {
         return (
-            <div>
-                <strong>{title}</strong>
+            <div className="icon-row">
+                {event.icons.map((color, i) => (
+                    <span
+                        key={i}
+                        className="color-circle"
+                        style={{ backgroundColor: color }}
+                        title={color}
+                    />
+                ))}
             </div>
-        ) 
-    };
+        );
+    }
 
-    return filter === "icons" ? renderIcon() : renderInfo(); //filter === "icons" ? renderIcon() :
+    // If it's an eventInfo row
+    if (event.filter === "eventinfo") {
+        return (
+            <div className="event-info">
+                <strong>{event.title}</strong>
+            </div>
+        );
+    }
+
+    return null;
 };
+
+
+function groupIconEventsByDay(events: CalEvent[], view: string): CalEvent[] {
+    if (view !== "month") return events;
+
+    const groupedMap = new Map<string, CalEvent>();
+    const result: CalEvent[] = [];
+
+    for (const event of events) {
+        if (event.filter === "eventinfo") {
+            // Keep regular event info events ungrouped
+            result.push(event);
+            continue;
+        }
+
+        if (event.filter === "icons") {
+            const dayKey = event.start.toDateString();
+
+            if (!groupedMap.has(dayKey)) {
+                groupedMap.set(dayKey, {
+                    ...event,
+                    filter: "icons",
+                    iconName: "",         // suppress single icon
+                    title: "",            // suppress title
+                    icons: [event.fontColor || "#999"], // custom field for grouped icons
+                });
+            } else {
+                const grouped = groupedMap.get(dayKey)!;
+                (grouped.icons ||= []).push(event.fontColor || "#999");
+            }
+        }
+    }
+
+    return [...result, ...groupedMap.values()];
+}
+
+
 
 const localizer = dateFnsLocalizer({
     format: dateFns.format,
@@ -86,6 +109,7 @@ interface CalEvent {
     filter: string;
     iconName: string;
     // optional: 
+    icons?: string[];
     location?: string; 
     fontColor?: string;
     backgroundColor?: string;
@@ -162,7 +186,10 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         return { title, start, end, fontColor, backgroundColor, allDay, location, type, filter, iconName }; 
     });
 
-    const events = expandMultiDayEvents(rawEvents, currentView);
+    // const events = expandMultiDayEvents(rawEvents, currentView);
+    const expanded = expandMultiDayEvents(rawEvents, currentView);
+    const events = groupIconEventsByDay(expanded, currentView);
+
 
     const viewsOption: Array<"month" | "week" | "work_week" | "day" | "agenda"> =
         props.view === "standard" ? ["week", "month", "day"] : ["month", "week", "work_week", "day", "agenda"]; 
@@ -248,7 +275,7 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
             props.onClickShowMore.execute();
         }
 
-        // Switch to 'month' view explicitly
+        // Switch to 'month' view explicitly (so that it doesn't go to day view)
         if (props.viewAttribute?.setValue) {
             props.viewAttribute.setValue("month");
         }
