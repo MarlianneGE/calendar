@@ -5,7 +5,7 @@ import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CalendarContainerProps } from "../typings/CalendarProps";
 import { constructWrapperStyle } from "./utils/utils";
-import { format, startOfWeek } from 'date-fns';
+import { format, startOfWeek } from 'date-fns';  
 import * as dateFns from "date-fns";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -16,7 +16,6 @@ import {
     faClock,
     faPlane
 } from "@fortawesome/free-solid-svg-icons";
-
 
 // Event content is customized based on icons or eventInfo and allDay or timed events and week or month view 
 const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
@@ -37,7 +36,7 @@ const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
     );
 };
 const CustomMonthEvent = ({ event }: { event: CalEvent }) => {
-    const { title, location, start, end, allDay, filter, iconName } = event;
+    const { iconName, title, filter, } = event; //title, location, start, end, allDay, filter, 
 
     const iconMap: { [key: string]: any } = {
         "house": faHouse,
@@ -60,25 +59,15 @@ const CustomMonthEvent = ({ event }: { event: CalEvent }) => {
 
     // show event info 
     const renderInfo = () => {
-        return allDay ? (
-            <div className="allDay-event">
+        return (
+            <div>
                 <strong>{title}</strong>
-                <p>{location}</p>
             </div>
-        ) : (
-            <div className="timed-event">
-                <strong>{title}</strong>
-                <p>
-                    {start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false })} -{" "}
-                    {end.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false })}
-                </p>
-            </div>
-        );
+        ) 
     };
 
-    return filter === "icons" ? renderIcon() : renderInfo();
+    return filter === "icons" ? renderIcon() : renderInfo(); //filter === "icons" ? renderIcon() :
 };
-
 
 const localizer = dateFnsLocalizer({
     format: dateFns.format,
@@ -87,7 +76,6 @@ const localizer = dateFnsLocalizer({
     getDay: dateFns.getDay,
     locales: {}
 });
-
 
 interface CalEvent {
     title: string;
@@ -143,7 +131,6 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
 }
 
 
-
 export default function MxCalendar(props: CalendarContainerProps): ReactElement {
     const { class: className } = props;
 
@@ -172,15 +159,13 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         const rawFilter = props.filterType?.get(item)?.value;
         const filter = rawFilter ? rawFilter.toString().toLowerCase() : "";
 
-
         return { title, start, end, fontColor, backgroundColor, allDay, location, type, filter, iconName }; 
     });
 
     const events = expandMultiDayEvents(rawEvents, currentView);
 
     const viewsOption: Array<"month" | "week" | "work_week" | "day" | "agenda"> =
-        props.view === "standard" ? ["week", "month"] : ["month", "week", "work_week", "day", "agenda"]; 
-
+        props.view === "standard" ? ["week", "month", "day"] : ["month", "week", "work_week", "day", "agenda"]; 
 
     const eventPropGetter = (event: CalEvent) => {
         const shouldApplyBackground = currentView === "week" || (currentView === "month" && event.filter === "eventinfo");
@@ -210,12 +195,6 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
             localizer: ReturnType<typeof dateFnsLocalizer>
         ) => localizer.format(date, 'd', culture),
  
-    }), []);
-
-    // messages  
-    const messages = useMemo(() => ({
-        previous: '‹', // or can use '\u2039'
-        next: '›' 
     }), []);
 
     // header for the week view 
@@ -254,7 +233,30 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         }
     };
 
+    // messages  
+    const messages = useMemo(() => ({
+        showMore: (total: number) => `+${total}`
+    }), []);
 
+    function onShowMore(events: CalEvent[], _date: Date): false  { // date is unused so use underscore to remove error that its not being used 
+        
+        if (events.length > 0 && props.clickedDate?.setValue) {
+            props.clickedDate.setValue(events[0].start);
+        }
+
+        if (props.onClickShowMore?.canExecute) {
+            props.onClickShowMore.execute();
+        }
+
+        // Switch to 'month' view explicitly
+        if (props.viewAttribute?.setValue) {
+            props.viewAttribute.setValue("month");
+        }
+
+        // Prevent default navigation to day view
+        return false;
+    }
+  
     return (
         <div className={classnames(className)} style={wrapperStyle}>
             <Calendar<CalEvent>
@@ -275,13 +277,10 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                     },
                 }}
                 formats={formats}
-                showAllEvents={true}
-                messages={messages}
-
                 toolbar={false}
                 view={currentView ?? props.defaultView}
                 date={props.dateAttribute?.value ?? new Date()}
-                onView={(newView: "month" | "week" ) => {
+                onView={(newView: "month" | "week" | "day") => {
                     props.viewAttribute?.setValue?.(newView);
                 }}
                 onNavigate={(newDate: Date) => {
@@ -290,8 +289,16 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                 selectable={true}
                 onSelectSlot={handleSelectSlot} // empty space on calendar 
                 onSelectEvent={handleSelectEvent}
+                showMultiDayTimes={true}
+                // timeslots={1} // number of slots per "section" in the time grid views
+                // step={4} // selectable time increments 
+                messages={messages}
+                onShowMore={onShowMore}
+                popup={false}
+                drilldownView={null}
             />
         </div>
     );
 }
+
 

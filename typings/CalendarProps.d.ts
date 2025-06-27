@@ -51,6 +51,7 @@ export interface CalendarContainerProps {
     defaultView: DefaultViewEnum;
     onClickEvent?: ActionValue;
     onClickEmpty?: ActionValue;
+    onClickShowMore?: ActionValue;
     widthUnit: WidthUnitEnum;
     width: number;
     heightUnit: HeightUnitEnum;
@@ -95,6 +96,7 @@ export interface CalendarPreviewProps {
     defaultView: DefaultViewEnum;
     onClickEvent: {} | null;
     onClickEmpty: {} | null;
+    onClickShowMore: {} | null;
     widthUnit: WidthUnitEnum;
     width: number | null;
     heightUnit: HeightUnitEnum;

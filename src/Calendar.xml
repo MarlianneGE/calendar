@@ -164,6 +164,10 @@
                 <caption>On click empty</caption>
                 <description>Triggered when an empty time slot is selected</description>
             </property>
+            <property key="onClickShowMore" type="action" required="false">
+                <caption>On click of the +${count} text </caption>
+                <description>Triggered when the show more text is clicked</description>
+            </property>
         </propertyGroup>
         <propertyGroup caption="Dimensions">
             <property key="widthUnit" type="enumeration" defaultValue="percentage">

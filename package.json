@@ -10,7 +10,7 @@
   },
   "license": "Apache-2.0",
   "config": {
-    "projectPath": "../../GE-ClientDesignSystems-main",
+    "projectPath": "../../GE-ClientDesignSystems-WADA",
     "mendixHost": "http://localhost:8080",
     "developmentPort": 3000
   },
