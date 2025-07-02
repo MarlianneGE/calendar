@@ -10,22 +10,19 @@ import * as dateFns from "date-fns";
 
 // Event content is customized based on icons or eventInfo and allDay or timed events and week or month view 
 const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
-     const { title, location, start, end, allDay } = event;
+     const { title, start, allDay } = event;
     return allDay ? (
         <div className="allDay-event">
             <strong>{title}</strong>
-            <p>{location}</p>
         </div>
     ) : (
         <div className="timed-event">
+            <p>{start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false })}</p>
             <strong>{title}</strong>
-            <p>
-                {start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false })} -{" "}
-                {end.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false })}
-            </p>
         </div>
     );
 };
+
 interface CustomMonthEventProps {
     event: CalEvent & { icons?: string[] };
     onShowMoreClick?: (date: Date) => void;
@@ -211,7 +208,6 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         return { title, start, end, fontColor, backgroundColor, allDay, location, type, filter, iconName }; 
     });
 
-    // const events = expandMultiDayEvents(rawEvents, currentView);
     const expanded = expandMultiDayEvents(rawEvents, currentView);
     const events = groupIconEventsByDay(expanded, currentView);
 
