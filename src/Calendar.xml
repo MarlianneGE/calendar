@@ -76,13 +76,6 @@
                         <attributeType name="String" />
                     </attributeTypes>
                 </property>
-                <property key="eventTypeAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>Event Type attribute</caption>
-                    <description>Select an attribute that contains the event type</description>
-                    <attributeTypes>
-                        <attributeType name="Enum" />
-                    </attributeTypes>
-                </property>
                 <property key="allDayAttribute" type="attribute" dataSource="databaseDataSource" required="false">
                     <caption>All day attribute</caption>
                     <description />

@@ -127,7 +127,6 @@ interface CalEvent {
     start: Date;
     end: Date;
     allDay: boolean;
-    type: string;
     filter: string;
     iconName: string;
     // optional: 
@@ -200,12 +199,11 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         const fontColor = props.eventFontColor?.get(item).value;
         const backgroundColor = props.eventBackgroundColor?.get(item).value;
         const location = props.locationAttribute?.get(item).value ?? "";
-        const type = props.eventTypeAttribute?.get(item).value ?? "";
         const iconName = props.iconAttribute?.get(item).value ?? "";
         const rawFilter = props.filterType?.get(item)?.value;
         const filter = rawFilter ? rawFilter.toString().toLowerCase() : "";
 
-        return { title, start, end, fontColor, backgroundColor, allDay, location, type, filter, iconName }; 
+        return { title, start, end, fontColor, backgroundColor, allDay, location, filter, iconName }; 
     });
 
     const expanded = expandMultiDayEvents(rawEvents, currentView);

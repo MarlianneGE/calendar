@@ -39,7 +39,6 @@ export interface CalendarContainerProps {
     titleAttribute?: ListAttributeValue<string>;
     titleExpression?: ListExpressionValue<string>;
     locationAttribute?: ListAttributeValue<string>;
-    eventTypeAttribute?: ListAttributeValue<string>;
     allDayAttribute?: ListAttributeValue<boolean>;
     startAttribute?: ListAttributeValue<Date>;
     endAttribute?: ListAttributeValue<Date>;
@@ -84,7 +83,6 @@ export interface CalendarPreviewProps {
     titleAttribute: string;
     titleExpression: string;
     locationAttribute: string;
-    eventTypeAttribute: string;
     allDayAttribute: string;
     startAttribute: string;
     endAttribute: string;
