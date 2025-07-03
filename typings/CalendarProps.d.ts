@@ -8,6 +8,8 @@ import { ActionValue, EditableValue, ListValue, ListAttributeValue, ListExpressi
 
 export type TitleTypeEnum = "attribute" | "expression";
 
+export type InfoTypeEnum = "attribute" | "expression";
+
 export type ViewEnum = "standard" | "dashboard";
 
 export type EditableEnum = "default" | "never";
@@ -42,6 +44,9 @@ export interface CalendarContainerProps {
     allDayAttribute?: ListAttributeValue<boolean>;
     startAttribute?: ListAttributeValue<Date>;
     endAttribute?: ListAttributeValue<Date>;
+    infoType: InfoTypeEnum;
+    infoAttribute?: ListAttributeValue<string>;
+    infoExpression?: ListExpressionValue<string>;
     eventBackgroundColor?: ListAttributeValue<string>;
     eventFontColor?: ListAttributeValue<string>;
     view: ViewEnum;
@@ -86,6 +91,9 @@ export interface CalendarPreviewProps {
     allDayAttribute: string;
     startAttribute: string;
     endAttribute: string;
+    infoType: InfoTypeEnum;
+    infoAttribute: string;
+    infoExpression: string;
     eventBackgroundColor: string;
     eventFontColor: string;
     view: ViewEnum;

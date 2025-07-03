@@ -10,14 +10,15 @@ import * as dateFns from "date-fns";
 
 // Event content is customized based on icons or eventInfo and allDay or timed events and week or month view 
 const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
-     const { title, start, allDay } = event;
+     const { title, allDay, info } = event;
     return allDay ? (
         <div className="allDay-event">
+            <p>{info}</p>
             <strong>{title}</strong>
         </div>
     ) : (
         <div className="timed-event">
-            <p>{start.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: false })}</p>
+            <p>{info}</p>
             <strong>{title}</strong>
         </div>
     );
@@ -68,6 +69,7 @@ const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => 
     if (event.filter === "eventinfo") {
         return (
             <div className="event-info">
+                <p>{event.info}</p>
                 <strong>{event.title}</strong>
             </div>
         );
@@ -134,6 +136,7 @@ interface CalEvent {
     location?: string; 
     fontColor?: string;
     backgroundColor?: string;
+    info?: string;
 }
 
 // icons need to show on each day of a multiday event 
@@ -193,6 +196,13 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                   ? (props.titleExpression.get(item).value ?? "")
                   : "Untitled Event";
 
+        const info =
+            props.infoType === "attribute" && props.infoAttribute
+                ? (props.infoAttribute.get(item).value ?? "")
+                : props.infoType === "expression" && props.infoExpression
+                  ? (props.infoExpression.get(item).value ?? "")
+                  : "";
+
         const start = props.startAttribute?.get(item).value ?? new Date();
         const end = props.endAttribute?.get(item).value ?? start;
         const allDay = props.allDayAttribute?.get(item).value ?? false;
@@ -203,7 +213,7 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         const rawFilter = props.filterType?.get(item)?.value;
         const filter = rawFilter ? rawFilter.toString().toLowerCase() : "";
 
-        return { title, start, end, fontColor, backgroundColor, allDay, location, filter, iconName }; 
+        return { title, start, end, fontColor, backgroundColor, allDay, location, filter, iconName, info }; 
     });
 
     const expanded = expandMultiDayEvents(rawEvents, currentView);
@@ -240,6 +250,12 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
             culture: string | undefined,
             localizer: ReturnType<typeof dateFnsLocalizer>
         ) => localizer.format(date, 'd', culture),
+
+        timeGutterFormat: (
+            date: Date,
+            culture: string | undefined,
+            localizer: ReturnType<typeof dateFnsLocalizer>
+        ) => localizer.format(date, "HH", culture), // 24-hour format, no AM/PM and no minutes 
  
     }), []);
 

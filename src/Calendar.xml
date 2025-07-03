@@ -97,6 +97,30 @@
                         <attributeType name="DateTime" />
                     </attributeTypes>
                 </property>
+
+                <property key="infoType" type="enumeration" defaultValue="attribute">
+                    <caption>Info type</caption>
+                    <description>Choose between an attribute or an expression for the first information to display</description>
+                    <enumerationValues>
+                        <enumerationValue key="attribute">Attribute</enumerationValue>
+                        <enumerationValue key="expression">Expression</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="infoAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>Info attribute</caption>
+                    <description>Select an attribute that contains the information to display</description>
+                    <attributeTypes>
+                        <attributeType name="Enum" />
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+                <property key="infoExpression" type="expression" dataSource="databaseDataSource" required="false">
+                    <caption>Information expression</caption>
+                    <description>Expression that results in the information to display</description>
+                    <returnType type="String" />
+                </property>
+
+
                 <property key="eventBackgroundColor" type="attribute" dataSource="databaseDataSource" required="false">
                     <caption>Background Color attribute</caption>
                     <description>Attribute containing a valid html color eg: red #FF0000 rgb(250,10,20) rgba(10,10,10, 0.5)</description>
