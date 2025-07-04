@@ -6,9 +6,9 @@
 import { CSSProperties } from "react";
 import { ActionValue, EditableValue, ListValue, ListAttributeValue, ListExpressionValue } from "mendix";
 
-export type TitleTypeEnum = "attribute" | "expression";
-
 export type InfoTypeEnum = "attribute" | "expression";
+
+export type TitleTypeEnum = "attribute" | "expression";
 
 export type ViewEnum = "standard" | "dashboard";
 
@@ -33,26 +33,25 @@ export interface CalendarContainerProps {
     tabIndex?: number;
     databaseDataSource?: ListValue;
     dateAttribute?: EditableValue<Date>;
-    clickedDate?: EditableValue<Date>;
     viewAttribute?: EditableValue<string>;
     filterType?: ListAttributeValue<string>;
     iconAttribute?: ListAttributeValue<string>;
-    titleType: TitleTypeEnum;
-    titleAttribute?: ListAttributeValue<string>;
-    titleExpression?: ListExpressionValue<string>;
-    locationAttribute?: ListAttributeValue<string>;
-    allDayAttribute?: ListAttributeValue<boolean>;
-    startAttribute?: ListAttributeValue<Date>;
-    endAttribute?: ListAttributeValue<Date>;
     infoType: InfoTypeEnum;
     infoAttribute?: ListAttributeValue<string>;
     infoExpression?: ListExpressionValue<string>;
+    titleType: TitleTypeEnum;
+    titleAttribute?: ListAttributeValue<string>;
+    titleExpression?: ListExpressionValue<string>;
+    allDayAttribute?: ListAttributeValue<boolean>;
+    startAttribute?: ListAttributeValue<Date>;
+    endAttribute?: ListAttributeValue<Date>;
     eventBackgroundColor?: ListAttributeValue<string>;
     eventFontColor?: ListAttributeValue<string>;
     view: ViewEnum;
     editable: EditableEnum;
     enableCreate: boolean;
     defaultView: DefaultViewEnum;
+    clickedDate?: EditableValue<Date>;
     onClickEvent?: ActionValue;
     onClickEmpty?: ActionValue;
     onClickShowMore?: ActionValue;
@@ -80,26 +79,25 @@ export interface CalendarPreviewProps {
     translate: (text: string) => string;
     databaseDataSource: {} | { caption: string } | { type: string } | null;
     dateAttribute: string;
-    clickedDate: string;
     viewAttribute: string;
     filterType: string;
     iconAttribute: string;
-    titleType: TitleTypeEnum;
-    titleAttribute: string;
-    titleExpression: string;
-    locationAttribute: string;
-    allDayAttribute: string;
-    startAttribute: string;
-    endAttribute: string;
     infoType: InfoTypeEnum;
     infoAttribute: string;
     infoExpression: string;
+    titleType: TitleTypeEnum;
+    titleAttribute: string;
+    titleExpression: string;
+    allDayAttribute: string;
+    startAttribute: string;
+    endAttribute: string;
     eventBackgroundColor: string;
     eventFontColor: string;
     view: ViewEnum;
     editable: EditableEnum;
     enableCreate: boolean;
     defaultView: DefaultViewEnum;
+    clickedDate: string;
     onClickEvent: {} | null;
     onClickEmpty: {} | null;
     onClickShowMore: {} | null;

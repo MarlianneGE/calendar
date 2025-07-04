@@ -21,13 +21,6 @@
                         <attributeType name="DateTime" />
                     </attributeTypes>
                 </property>
-                <property key="clickedDate" type="attribute" required="false">
-                    <caption>Clicked Date</caption>
-                    <description>The date that was clicked. Used to pass to onClick action.</description>
-                    <attributeTypes>
-                        <attributeType name="DateTime" />
-                    </attributeTypes>
-                </property>
                 <property key="viewAttribute" type="attribute" required="false">
                     <caption>View attribute</caption>
                     <description>The desired view, either week or month</description>
@@ -48,56 +41,7 @@
                     <attributeTypes>
                         <attributeType name="String" />
                     </attributeTypes>
-                </property>
-                <property key="titleType" type="enumeration" defaultValue="attribute">
-                    <caption>Title type</caption>
-                    <description>Choose between an attribute or an expression for the title</description>
-                    <enumerationValues>
-                        <enumerationValue key="attribute">Attribute</enumerationValue>
-                        <enumerationValue key="expression">Expression</enumerationValue>
-                    </enumerationValues>
-                </property>
-                <property key="titleAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>Title attribute</caption>
-                    <description>Select an attribute that contains the event title</description>
-                    <attributeTypes>
-                        <attributeType name="String" />
-                    </attributeTypes>
-                </property>
-                <property key="titleExpression" type="expression" dataSource="databaseDataSource" required="false">
-                    <caption>Title expression</caption>
-                    <description>Expression that results in the event title</description>
-                    <returnType type="String" />
-                </property>
-                <property key="locationAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>Location attribute</caption>
-                    <description>Select an attribute that contains the event location</description>
-                    <attributeTypes>
-                        <attributeType name="String" />
-                    </attributeTypes>
-                </property>
-                <property key="allDayAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>All day attribute</caption>
-                    <description />
-                    <attributeTypes>
-                        <attributeType name="Boolean" />
-                    </attributeTypes>
-                </property>
-                <property key="startAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>Start attribute</caption>
-                    <description />
-                    <attributeTypes>
-                        <attributeType name="DateTime" />
-                    </attributeTypes>
-                </property>
-                <property key="endAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>End attribute</caption>
-                    <description />
-                    <attributeTypes>
-                        <attributeType name="DateTime" />
-                    </attributeTypes>
-                </property>
-
+                </property>                
                 <property key="infoType" type="enumeration" defaultValue="attribute">
                     <caption>Info type</caption>
                     <description>Choose between an attribute or an expression for the first information to display</description>
@@ -108,7 +52,7 @@
                 </property>
                 <property key="infoAttribute" type="attribute" dataSource="databaseDataSource" required="false">
                     <caption>Info attribute</caption>
-                    <description>Select an attribute that contains the information to display</description>
+                    <description>Select an attribute that contains the first information to display</description>
                     <attributeTypes>
                         <attributeType name="Enum" />
                         <attributeType name="String" />
@@ -116,11 +60,50 @@
                 </property>
                 <property key="infoExpression" type="expression" dataSource="databaseDataSource" required="false">
                     <caption>Information expression</caption>
-                    <description>Expression that results in the information to display</description>
+                    <description>Expression that results in the first information to display</description>
                     <returnType type="String" />
                 </property>
-
-
+                <property key="titleType" type="enumeration" defaultValue="attribute">
+                    <caption>Title type</caption>
+                    <description>Choose between an attribute or an expression for the second information to display</description>
+                    <enumerationValues>
+                        <enumerationValue key="attribute">Attribute</enumerationValue>
+                        <enumerationValue key="expression">Expression</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="titleAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>Title attribute</caption>
+                    <description>Select an attribute that contains the second information to display</description>
+                    <attributeTypes>
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+                <property key="titleExpression" type="expression" dataSource="databaseDataSource" required="false">
+                    <caption>Title expression</caption>
+                    <description>Expression that results in the secodn information to display</description>
+                    <returnType type="String" />
+                </property>
+                <property key="allDayAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>All day attribute</caption>
+                    <description>Boolean for if the event is all day or not</description>
+                    <attributeTypes>
+                        <attributeType name="Boolean" />
+                    </attributeTypes>
+                </property>
+                <property key="startAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>Start Day and Time attribute</caption>
+                    <description />
+                    <attributeTypes>
+                        <attributeType name="DateTime" />
+                    </attributeTypes>
+                </property>
+                <property key="endAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>End Day and Time attribute</caption>
+                    <description />
+                    <attributeTypes>
+                        <attributeType name="DateTime" />
+                    </attributeTypes>
+                </property>
                 <property key="eventBackgroundColor" type="attribute" dataSource="databaseDataSource" required="false">
                     <caption>Background Color attribute</caption>
                     <description>Attribute containing a valid html color eg: red #FF0000 rgb(250,10,20) rgba(10,10,10, 0.5)</description>
@@ -173,6 +156,13 @@
             </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Events">
+            <property key="clickedDate" type="attribute" required="false">
+                <caption>Clicked Date</caption>
+                <description>The date that was clicked. Used to pass to onClick action.</description>
+                <attributeTypes>
+                    <attributeType name="DateTime" />
+                </attributeTypes>
+            </property>
             <property key="onClickEvent" type="action" required="false">
                 <caption>On click action</caption>
                 <description />
