@@ -27,6 +27,7 @@ const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
 interface CustomMonthEventProps {
     event: CalEvent & { icons?: string[] };
     onShowMoreClick?: (date: Date) => void;
+
 }
 
 const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => {
@@ -298,24 +299,40 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         showMore: (total: number) => `+${total}`
     }), []);
 
-    function onShowMore(events: CalEvent[], _date: Date): false  { // date is unused so use underscore to remove error that its not being used 
+    // function onShowMore(events: CalEvent[], _date: Date): false  { // date is unused so use underscore to remove error that its not being used 
         
-        if (events.length > 0 && props.clickedDate?.setValue) {
-            props.clickedDate.setValue(events[0].start);
-        }
+    //     if (events.length > 0 && props.clickedDate?.setValue) {
+    //         props.clickedDate.setValue(events[0].start);
+    //     }
 
-        if (props.onClickShowMore?.canExecute) {
-            props.onClickShowMore.execute();
-        }
+    //     if (props.onClickShowMore?.canExecute) {
+    //         props.onClickShowMore.execute();
+    //     }
 
-        // Switch to 'month' view explicitly (so that it doesn't go to day view)
-        if (props.viewAttribute?.setValue) {
-            props.viewAttribute.setValue("month");
-        }
+    //     // Switch to 'month' view explicitly (so that it doesn't go to day view)
+    //     if (props.viewAttribute?.setValue) {
+    //         props.viewAttribute.setValue("month");
+    //     }
 
-        // Prevent default navigation to day view
-        return false;
+    //     // Prevent default navigation to day view
+    //     return false;
+    // }
+    function onShowMore(_events: CalEvent[], date: Date): false {
+    if (props.clickedDate?.setValue) {
+        props.clickedDate.setValue(date);
     }
+
+    if (props.onClickShowMore?.canExecute) {
+        props.onClickShowMore.execute();
+    }
+
+    if (props.viewAttribute?.setValue) {
+        props.viewAttribute.setValue("month");
+    }
+
+    return false;
+}
+
 
     useEffect(() => {
         const handler = (e: any) => {
@@ -348,7 +365,11 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                     event: (calendarEventProps: { event: CalEvent }) => (
                     <CustomMonthEvent
                         {...calendarEventProps}
-                        onShowMoreClick={(date) => onShowMore([], date)}
+                        
+
+
+    onShowMoreClick={(date) => onShowMore([], date)}
+
                     />
                     )
                 },
