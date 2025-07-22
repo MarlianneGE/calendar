@@ -137,6 +137,7 @@ interface CalEvent {
     fontColor?: string;
     backgroundColor?: string;
     info?: string;
+    type?: string;
 }
 
 // icons need to show on each day of a multiday event 
@@ -211,8 +212,9 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         const iconName = props.iconAttribute?.get(item).value ?? "";
         const rawFilter = props.filterType?.get(item)?.value;
         const filter = rawFilter ? rawFilter.toString().toLowerCase() : "";
+        const type = props.eventTypeAttribute?.get(item)?.value ?? "";
 
-        return { title, start, end, fontColor, backgroundColor, allDay, filter, iconName, info }; 
+        return { title, start, end, fontColor, backgroundColor, allDay, filter, iconName, info, type }; 
     });
 
     const expanded = expandMultiDayEvents(rawEvents, currentView);
@@ -266,6 +268,35 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
             <div className="custom-week-header">
                 <div className="custom-week-header-letter">{dayLetter}</div>
                 <div className="custom-week-header-number">{dayNumber}</div>
+            </div>
+        );
+    };
+
+    // for the month view only 
+    const CustomMonthDateHeader = ({ label, date }: { label: string, date: Date }) => {
+        const isToday = new Date().toDateString() === date.toDateString();
+
+        const hasTimeslot = events.some(
+            event =>
+                event.type === "Timeslot" &&
+                new Date(event.start).toDateString() === date.toDateString()
+        );
+
+        const className = [
+            "rbc-date-cell",
+            !hasTimeslot ? "no-timeslot-cell" : "",
+            isToday ? "rbc-now" : ""
+        ]
+            .filter(Boolean)
+            .join(" ");
+
+        return (
+            <div className={className}>
+                {isToday ? (
+                    <span className="today-inner">{label}</span>
+                ) : (
+                    label
+                )}
             </div>
         );
     };
@@ -343,14 +374,15 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                         header: CustomWeekHeader,
                         event: CustomWeekEvent
                     },
-                month: {
-                    event: (calendarEventProps: { event: CalEvent }) => (
-                    <CustomMonthEvent
-                        {...calendarEventProps}
-                        onShowMoreClick={(date) => onShowMore([], date)}     
-                    />
-                    )
-                },
+                    dateHeader: CustomMonthDateHeader,
+                    month: {
+                        event: (calendarEventProps: { event: CalEvent }) => (
+                        <CustomMonthEvent
+                            {...calendarEventProps}
+                            onShowMoreClick={(date) => onShowMore([], date)}     
+                        />
+                        )
+                    },
                 }}
                 formats={formats}
                 toolbar={false}

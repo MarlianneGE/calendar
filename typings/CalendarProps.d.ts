@@ -34,6 +34,7 @@ export interface CalendarContainerProps {
     databaseDataSource?: ListValue;
     dateAttribute?: EditableValue<Date>;
     viewAttribute?: EditableValue<string>;
+    eventTypeAttribute?: ListAttributeValue<string>;
     filterType?: ListAttributeValue<string>;
     iconAttribute?: ListAttributeValue<string>;
     infoType: InfoTypeEnum;
@@ -80,6 +81,7 @@ export interface CalendarPreviewProps {
     databaseDataSource: {} | { caption: string } | { type: string } | null;
     dateAttribute: string;
     viewAttribute: string;
+    eventTypeAttribute: string;
     filterType: string;
     iconAttribute: string;
     infoType: InfoTypeEnum;
