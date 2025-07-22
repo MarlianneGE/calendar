@@ -8,6 +8,7 @@ import { constructWrapperStyle } from "./utils/utils";
 import { format, startOfWeek } from 'date-fns';  
 import * as dateFns from "date-fns";
 
+
 // Event content is customized based on icons or eventInfo and allDay or timed events and week or month view 
 const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
      const { title, allDay, info } = event;
@@ -273,10 +274,10 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
     };
 
     // for the month view only 
-    const CustomMonthDateHeader = ({ label, date }: { label: string, date: Date }) => {
+    const CustomMonthDateHeader = ({ label, date, ungroupedEvents }: { label: string, date: Date, ungroupedEvents: CalEvent[] }) => {
         const isToday = new Date().toDateString() === date.toDateString();
 
-        const hasTimeslot = events.some(
+        const hasTimeslot = ungroupedEvents.some(
             event =>
                 event.type === "Timeslot" &&
                 new Date(event.start).toDateString() === date.toDateString()
@@ -374,7 +375,13 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                         header: CustomWeekHeader,
                         event: CustomWeekEvent
                     },
-                    dateHeader: CustomMonthDateHeader,
+                    dateHeader: ({ label, date }: { label: string, date: Date }) => (
+                        <CustomMonthDateHeader
+                            label={label}
+                            date={date}
+                            ungroupedEvents={expanded}
+                        />
+                    ),
                     month: {
                         event: (calendarEventProps: { event: CalEvent }) => (
                         <CustomMonthEvent
