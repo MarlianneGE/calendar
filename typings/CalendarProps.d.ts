@@ -6,15 +6,11 @@
 import { CSSProperties } from "react";
 import { ActionValue, EditableValue, ListValue, ListAttributeValue, ListExpressionValue } from "mendix";
 
-export type InfoTypeEnum = "attribute" | "expression";
+export type DefaultViewEnum = "week" | "month";
 
-export type TitleTypeEnum = "attribute" | "expression";
+export type Text1Enum = "attribute" | "expression";
 
-export type ViewEnum = "standard" | "dashboard";
-
-export type EditableEnum = "default" | "never";
-
-export type DefaultViewEnum = "day" | "week" | "month" | "work_week" | "agenda";
+export type Text2Enum = "attribute" | "expression";
 
 export type WidthUnitEnum = "pixels" | "percentage";
 
@@ -31,29 +27,25 @@ export interface CalendarContainerProps {
     class: string;
     style?: CSSProperties;
     tabIndex?: number;
-    datesSelected?: ListValue;
-    selectedDateAttr?: ListAttributeValue<Date>;
-    databaseDataSource?: ListValue;
     dateAttribute?: EditableValue<Date>;
     viewAttribute?: EditableValue<string>;
+    defaultView: DefaultViewEnum;
+    displayType?: EditableValue<string>;
+    databaseDataSource?: ListValue;
     eventTypeAttribute?: ListAttributeValue<string>;
-    filterType?: ListAttributeValue<string>;
-    iconAttribute?: ListAttributeValue<string>;
-    infoType: InfoTypeEnum;
-    infoAttribute?: ListAttributeValue<string>;
-    infoExpression?: ListExpressionValue<string>;
-    titleType: TitleTypeEnum;
-    titleAttribute?: ListAttributeValue<string>;
-    titleExpression?: ListExpressionValue<string>;
     allDayAttribute?: ListAttributeValue<boolean>;
     startAttribute?: ListAttributeValue<Date>;
     endAttribute?: ListAttributeValue<Date>;
+    text1: Text1Enum;
+    text1Attribute?: ListAttributeValue<string>;
+    text1Expression?: ListExpressionValue<string>;
+    text2: Text2Enum;
+    text2Attribute?: ListAttributeValue<string>;
+    text2Expression?: ListExpressionValue<string>;
     eventBackgroundColor?: ListAttributeValue<string>;
     eventFontColor?: ListAttributeValue<string>;
-    view: ViewEnum;
-    editable: EditableEnum;
-    enableCreate: boolean;
-    defaultView: DefaultViewEnum;
+    datesSelected?: ListValue;
+    selectedDateAttr?: ListAttributeValue<Date>;
     clickedDate?: EditableValue<Date>;
     onClickEvent?: ActionValue;
     onClickEmpty?: ActionValue;
@@ -80,29 +72,25 @@ export interface CalendarPreviewProps {
     readOnly: boolean;
     renderMode: "design" | "xray" | "structure";
     translate: (text: string) => string;
-    datesSelected: {} | { caption: string } | { type: string } | null;
-    selectedDateAttr: string;
-    databaseDataSource: {} | { caption: string } | { type: string } | null;
     dateAttribute: string;
     viewAttribute: string;
+    defaultView: DefaultViewEnum;
+    displayType: string;
+    databaseDataSource: {} | { caption: string } | { type: string } | null;
     eventTypeAttribute: string;
-    filterType: string;
-    iconAttribute: string;
-    infoType: InfoTypeEnum;
-    infoAttribute: string;
-    infoExpression: string;
-    titleType: TitleTypeEnum;
-    titleAttribute: string;
-    titleExpression: string;
     allDayAttribute: string;
     startAttribute: string;
     endAttribute: string;
+    text1: Text1Enum;
+    text1Attribute: string;
+    text1Expression: string;
+    text2: Text2Enum;
+    text2Attribute: string;
+    text2Expression: string;
     eventBackgroundColor: string;
     eventFontColor: string;
-    view: ViewEnum;
-    editable: EditableEnum;
-    enableCreate: boolean;
-    defaultView: DefaultViewEnum;
+    datesSelected: {} | { caption: string } | { type: string } | null;
+    selectedDateAttr: string;
     clickedDate: string;
     onClickEvent: {} | null;
     onClickEmpty: {} | null;

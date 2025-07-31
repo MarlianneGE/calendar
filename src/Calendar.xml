@@ -8,172 +8,141 @@
     <icon/>
     <properties>
         <propertyGroup caption="General">
-            <!-- OPTIONS SOURCE -->
-            <propertyGroup caption="Data source">
-                <property key="datesSelected" type="datasource" isList="true" required="false">
-                    <caption>Date(s) Selected</caption>
-                    <description></description>
-                </property>
-                <property key="selectedDateAttr" type="attribute" dataSource="datesSelected" required="false">
-                    <caption>Selected Date Attribute</caption>
-                    <description>Attribute on the Dates (s) Selected entity that contains the date.</description>
-                    <attributeTypes>
-                        <attributeType name="DateTime" />
-                    </attributeTypes>
-                </property>
-                <property key="databaseDataSource" type="datasource" isList="true" required="false">
-                    <caption>Events</caption>
-                    <description />
-                </property>
-                <property key="dateAttribute" type="attribute" required="false">
-                    <caption>Date attribute</caption>
-                    <description>The date that should be shown in the view</description>
-                    <attributeTypes>
-                        <attributeType name="DateTime" />
-                    </attributeTypes>
-                </property>
-                <property key="viewAttribute" type="attribute" required="false">
-                    <caption>View attribute</caption>
-                    <description>The desired view, either week or month</description>
-                    <attributeTypes>
-                        <attributeType name="Enum" />
-                    </attributeTypes>
-                </property>
-                <property key="eventTypeAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>Event Type attribute</caption>
-                    <description>Select an attribute that contains the event type</description>
-                    <attributeTypes>
-                        <attributeType name="Enum" />
-                    </attributeTypes>
-                </property>
-                <property key="filterType" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>Filter/Display Type attribute</caption>
-                    <description>Select an attribute that contains the display type of Icons or EventInfo</description>
-                    <attributeTypes>
-                        <attributeType name="Enum" />
-                    </attributeTypes>
-                </property>
-                <property key="iconAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>Icon attribute</caption>
-                    <description>Select an attribute that contains the icon class name</description>
-                    <attributeTypes>
-                        <attributeType name="String" />
-                    </attributeTypes>
-                </property>                
-                <property key="infoType" type="enumeration" defaultValue="attribute">
-                    <caption>Info type</caption>
-                    <description>Choose between an attribute or an expression for the first information to display</description>
-                    <enumerationValues>
-                        <enumerationValue key="attribute">Attribute</enumerationValue>
-                        <enumerationValue key="expression">Expression</enumerationValue>
-                    </enumerationValues>
-                </property>
-                <property key="infoAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>Info attribute</caption>
-                    <description>Select an attribute that contains the first information to display</description>
-                    <attributeTypes>
-                        <attributeType name="Enum" />
-                        <attributeType name="String" />
-                    </attributeTypes>
-                </property>
-                <property key="infoExpression" type="expression" dataSource="databaseDataSource" required="false">
-                    <caption>Information expression</caption>
-                    <description>Expression that results in the first information to display</description>
-                    <returnType type="String" />
-                </property>
-                <property key="titleType" type="enumeration" defaultValue="attribute">
-                    <caption>Title type</caption>
-                    <description>Choose between an attribute or an expression for the second information to display</description>
-                    <enumerationValues>
-                        <enumerationValue key="attribute">Attribute</enumerationValue>
-                        <enumerationValue key="expression">Expression</enumerationValue>
-                    </enumerationValues>
-                </property>
-                <property key="titleAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>Title attribute</caption>
-                    <description>Select an attribute that contains the second information to display</description>
-                    <attributeTypes>
-                        <attributeType name="String" />
-                    </attributeTypes>
-                </property>
-                <property key="titleExpression" type="expression" dataSource="databaseDataSource" required="false">
-                    <caption>Title expression</caption>
-                    <description>Expression that results in the secodn information to display</description>
-                    <returnType type="String" />
-                </property>
-                <property key="allDayAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>All day attribute</caption>
-                    <description>Boolean for if the event is all day or not</description>
-                    <attributeTypes>
-                        <attributeType name="Boolean" />
-                    </attributeTypes>
-                </property>
-                <property key="startAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>Start Day and Time attribute</caption>
-                    <description />
-                    <attributeTypes>
-                        <attributeType name="DateTime" />
-                    </attributeTypes>
-                </property>
-                <property key="endAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>End Day and Time attribute</caption>
-                    <description />
-                    <attributeTypes>
-                        <attributeType name="DateTime" />
-                    </attributeTypes>
-                </property>
-                <property key="eventBackgroundColor" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>Background Color attribute</caption>
-                    <description>Attribute containing a valid html color eg: red #FF0000 rgb(250,10,20) rgba(10,10,10, 0.5)</description>
-                    <attributeTypes>
-                        <attributeType name="Enum" />
-                        <attributeType name="String" />
-                    </attributeTypes>
-                </property>
-                <property key="eventFontColor" type="attribute" dataSource="databaseDataSource" required="false">
-                    <caption>Font Color attribute</caption>
-                    <description>Attribute containing a valid html color eg: red #FF0000 rgb(250,10,20) rgba(10,10,10, 0.5)</description>
-                    <attributeTypes>
-                        <attributeType name="Enum" />
-                        <attributeType name="String" />
-                    </attributeTypes>
-                </property>
-            </propertyGroup>
-            <propertyGroup caption="Options">
-                <property key="view" type="enumeration" defaultValue="standard">
-                    <caption>View</caption>
-                    <description>Standard has week and month</description>
-                    <enumerationValues>
-                        <enumerationValue key="standard">Standard</enumerationValue>
-                        <enumerationValue key="dashboard">Dashboard</enumerationValue>
-                    </enumerationValues>
-                </property>
-                <property key="editable" type="enumeration" defaultValue="default">
-                    <caption>Editable</caption>
-                    <description />
-                    <enumerationValues>
-                        <enumerationValue key="default">Default</enumerationValue>
-                        <enumerationValue key="never">Never</enumerationValue>
-                    </enumerationValues>
-                </property>
-                <property key="enableCreate" type="boolean" defaultValue="true">
-                    <caption>Enable create</caption>
-                    <description />
-                </property>
-                <property key="defaultView" type="enumeration" defaultValue="month">
-                    <caption>Initial selected view</caption>
-                    <description>Work week, day, and agenda are only available in dashboard views</description>
-                    <enumerationValues>
-                        <enumerationValue key="day">Day</enumerationValue>
-                        <enumerationValue key="week">Week</enumerationValue>
-                        <enumerationValue key="month">Month</enumerationValue>
-                        <enumerationValue key="work_week">(Work week)</enumerationValue>
-                        <enumerationValue key="agenda">(Agenda)</enumerationValue>
-                    </enumerationValues>
-                </property>
-            </propertyGroup>
+            <property key="dateAttribute" type="attribute" required="false">
+                <caption>Date attribute</caption>
+                <description>The date that should be shown in the view</description>
+                <attributeTypes>
+                    <attributeType name="DateTime" />
+                </attributeTypes>
+            </property>
+            <property key="viewAttribute" type="attribute" required="false">
+                <caption>View attribute</caption>
+                <description>The desired view, either week, month or quarter</description>
+                <attributeTypes>
+                    <attributeType name="Enum" />
+                </attributeTypes>
+            </property>
+            <property key="defaultView" type="enumeration" defaultValue="month">
+                <caption>Initial (default) view</caption>
+                <description></description>
+                <enumerationValues>
+                    <enumerationValue key="week">Week</enumerationValue>
+                    <enumerationValue key="month">Month</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="displayType" type="attribute" required="false">
+                <caption>Display Type attribute</caption>
+                <description>Select an attribute that contains the display type of Icon circles or EventInfo</description>
+                <attributeTypes>
+                    <attributeType name="Enum" />
+                </attributeTypes>
+            </property> 
         </propertyGroup>
-        <propertyGroup caption="Events">
+        <propertyGroup caption="Calendar Events">
+            <property key="databaseDataSource" type="datasource" isList="true" required="false">
+                <caption>Events</caption>
+                <description />
+            </property>
+            <property key="eventTypeAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                <caption>Event Type attribute</caption>
+                <description>Select an attribute that contains the event type</description>
+                <attributeTypes>
+                    <attributeType name="Enum" />
+                </attributeTypes>
+            </property>   
+            <property key="allDayAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                <caption>All day attribute</caption>
+                <description>Boolean for if the event is all day or not</description>
+                <attributeTypes>
+                    <attributeType name="Boolean" />
+                </attributeTypes>
+            </property>
+            <property key="startAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                <caption>Start Date/Time attribute</caption>
+                <description />
+                <attributeTypes>
+                    <attributeType name="DateTime" />
+                </attributeTypes>
+            </property>
+            <property key="endAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                <caption>End Date/Time attribute</caption>
+                <description />
+                <attributeTypes>
+                    <attributeType name="DateTime" />
+                </attributeTypes>
+            </property>
+            <property key="text1" type="enumeration" defaultValue="attribute">
+                <caption>First Text</caption>
+                <description>Choose between an attribute or an expression for the first text to display</description>
+                <enumerationValues>
+                    <enumerationValue key="attribute">Attribute</enumerationValue>
+                    <enumerationValue key="expression">Expression</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="text1Attribute" type="attribute" dataSource="databaseDataSource" required="false">
+                <caption>First Text attribute</caption>
+                <description></description>
+                <attributeTypes>
+                    <attributeType name="Enum" />
+                    <attributeType name="String" />
+                </attributeTypes>
+            </property>
+            <property key="text1Expression" type="expression" dataSource="databaseDataSource" required="false">
+                <caption>First Text expression</caption>
+                <description></description>
+                <returnType type="String" />
+            </property>
+            <property key="text2" type="enumeration" defaultValue="attribute">
+                <caption>Second Text</caption>
+                <description>Choose between an attribute or an expression for the second text to display</description>
+                <enumerationValues>
+                    <enumerationValue key="attribute">Attribute</enumerationValue>
+                    <enumerationValue key="expression">Expression</enumerationValue>
+                </enumerationValues>
+            </property>
+            <property key="text2Attribute" type="attribute" dataSource="databaseDataSource" required="false">
+                <caption>Second Text attribute</caption>
+                <description></description>
+                <attributeTypes>
+                    <attributeType name="String" />
+                </attributeTypes>
+            </property>
+            <property key="text2Expression" type="expression" dataSource="databaseDataSource" required="false">
+                <caption>Second Text expression</caption>
+                <description></description>
+                <returnType type="String" />
+            </property>
+            <property key="eventBackgroundColor" type="attribute" dataSource="databaseDataSource" required="false">
+                <caption>Background Color</caption>
+                <description>Attribute containing a valid html color</description>
+                <attributeTypes>
+                    <attributeType name="Enum" />
+                    <attributeType name="String" />
+                </attributeTypes>
+            </property>
+            <property key="eventFontColor" type="attribute" dataSource="databaseDataSource" required="false">
+                <caption>Font Color</caption>
+                <description>Attribute containing a valid html color</description>
+                <attributeTypes>
+                    <attributeType name="Enum" />
+                    <attributeType name="String" />
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="Date Picker">
+            <property key="datesSelected" type="datasource" isList="true" required="false">
+                <caption>Dates Selected</caption>
+                <description>A list of entities for the selected dates the user has chosen.</description>
+            </property>
+            <property key="selectedDateAttr" type="attribute" dataSource="datesSelected" required="false">
+                <caption>Selected Date Attribute</caption>
+                <description>Attribute on the Dates Selected entity that contains the date.</description>
+                <attributeTypes>
+                    <attributeType name="DateTime" />
+                </attributeTypes>
+            </property>
+        </propertyGroup>
+        <propertyGroup caption="On Click">
             <property key="clickedDate" type="attribute" required="false">
                 <caption>Clicked Date</caption>
                 <description>The date that was clicked. Used to pass to onClick action.</description>

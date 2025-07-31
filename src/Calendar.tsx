@@ -11,16 +11,16 @@ import * as dateFns from "date-fns";
 
 // Event content is customized based on icons or eventInfo and allDay or timed events and week or month view 
 const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
-     const { title, allDay, info } = event;
+     const { text2, allDay, text1 } = event;
     return allDay ? (
         <div className="allDay-event">
-            <p>{info}</p>
-            <strong>{title}</strong>
+            <p>{text1}</p>
+            <strong>{text2}</strong>
         </div>
     ) : (
         <div className="timed-event">
-            <p>{info}</p>
-            <strong>{title}</strong>
+            <p>{text1}</p>
+            <strong>{text2}</strong>
         </div>
     );
 };
@@ -32,7 +32,7 @@ interface CustomMonthEventProps {
 }
 
 const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => {
-    if (event.filter === "icons" && event.icons && event.icons.length > 0) {
+    if (event.display === "icons" && event.icons && event.icons.length > 0) {
         const maxToShow = 3;
         const visible = event.icons.slice(0, maxToShow);
         const hiddenCount = event.icons.length - visible.length;
@@ -68,11 +68,11 @@ const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => 
         );
     }
 
-    if (event.filter === "eventinfo") {
+    if (event.display === "eventinfo") {
         return (
             <div className="event-info">
-                <p>{event.info}</p>
-                <strong>{event.title}</strong>
+                <p>{event.text1}</p>
+                <strong>{event.text2}</strong>
             </div>
         );
     }
@@ -89,21 +89,20 @@ function groupIconEventsByDay(events: CalEvent[], view: string): CalEvent[] {
     const result: CalEvent[] = [];
 
     for (const event of events) {
-        if (event.filter === "eventinfo") {
+        if (event.display === "eventinfo") {
             // Keep regular event info events ungrouped
             result.push(event);
             continue;
         }
 
-        if (event.filter === "icons") {
+        if (event.display === "icons") {
             const dayKey = event.start.toDateString();
 
             if (!groupedMap.has(dayKey)) {
                 groupedMap.set(dayKey, {
                     ...event,
-                    filter: "icons",
-                    iconName: "",         // suppress single icon
-                    title: "",            // suppress title
+                    display: "icons",
+                    text2: "",            // suppress text2
                     icons: [event.fontColor || "#999"], // custom field for grouped icons
                 });
             } else {
@@ -127,17 +126,16 @@ const localizer = dateFnsLocalizer({
 });
 
 interface CalEvent {
-    title: string;
+    text2: string;
     start: Date;
     end: Date;
     allDay: boolean;
-    filter: string;
-    iconName: string;
+    display: string;
     // optional: 
     icons?: string[];
     fontColor?: string;
     backgroundColor?: string;
-    info?: string;
+    text1?: string;
     type?: string;
 }
 
@@ -150,9 +148,9 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
         const endDate = new Date(event.end);
 
         const isMultiDay = startDate.toDateString() !== endDate.toDateString();
-        const shouldChunk = event.filter === "icons" && view === "month";
+        const shouldChunk = event.display === "icons" && view === "month";
 
-        // chunk events that are more than 1 day when filter is icons
+        // chunk events that are more than 1 day when display is icons
         if (isMultiDay && shouldChunk) {
             let currentDate = new Date(startDate);
 
@@ -172,7 +170,7 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
                 currentDate.setDate(currentDate.getDate() + 1);
             }
         } else {
-            // if single-day events or if filter is EventInfo then don't chunk  
+            // if single-day events or if display is EventInfo then don't chunk  
             expandedEvents.push(event);
         }
     });
@@ -184,25 +182,27 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
 export default function MxCalendar(props: CalendarContainerProps): ReactElement {
     const { class: className } = props;
 
-    const currentView = props.viewAttribute?.value as typeof props.defaultView;
+    // currentView will be "month" if "quarter" is selected 
+    const rawView = props.viewAttribute?.value ?? props.defaultView;
+    const currentView = rawView === "quarter" ? "month" : rawView;
 
     const wrapperStyle = constructWrapperStyle(props);
 
     const items = props.databaseDataSource?.items ?? [];
 
     const rawEvents: CalEvent[] = items.map(item => {
-        const title =
-            props.titleType === "attribute" && props.titleAttribute
-                ? (props.titleAttribute.get(item).value ?? "")
-                : props.titleType === "expression" && props.titleExpression
-                  ? (props.titleExpression.get(item).value ?? "")
-                  : "Untitled Event";
+        const text1 =
+            props.text1 === "attribute" && props.text1Attribute
+                ? (props.text1Attribute.get(item).value ?? "")
+                : props.text1 === "expression" && props.text1Expression
+                  ? (props.text1Expression.get(item).value ?? "")
+                  : "";
 
-        const info =
-            props.infoType === "attribute" && props.infoAttribute
-                ? (props.infoAttribute.get(item).value ?? "")
-                : props.infoType === "expression" && props.infoExpression
-                  ? (props.infoExpression.get(item).value ?? "")
+        const text2 =
+            props.text2 === "attribute" && props.text2Attribute
+                ? (props.text2Attribute.get(item).value ?? "")
+                : props.text2 === "expression" && props.text2Expression
+                  ? (props.text2Expression.get(item).value ?? "")
                   : "";
 
         const start = props.startAttribute?.get(item).value ?? new Date();
@@ -210,23 +210,20 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         const allDay = props.allDayAttribute?.get(item).value ?? false;
         const fontColor = props.eventFontColor?.get(item).value;
         const backgroundColor = props.eventBackgroundColor?.get(item).value;
-        const iconName = props.iconAttribute?.get(item).value ?? "";
-        const rawFilter = props.filterType?.get(item)?.value;
-        const filter = rawFilter ? rawFilter.toString().toLowerCase() : "";
+        const rawdisplay = props.displayType?.value;
+        const display = rawdisplay ? rawdisplay.toString().toLowerCase() : "";
         const type = props.eventTypeAttribute?.get(item)?.value ?? "";
 
-        return { title, start, end, fontColor, backgroundColor, allDay, filter, iconName, info, type }; 
+        return { text2, start, end, fontColor, backgroundColor, allDay, display, text1, type }; 
     });
 
     const expanded = expandMultiDayEvents(rawEvents, currentView);
     const events = groupIconEventsByDay(expanded, currentView);
 
-
-    const viewsOption: Array<"month" | "week" | "work_week" | "day" | "agenda"> =
-        props.view === "standard" ? ["week", "month", "day"] : ["month", "week", "work_week", "day", "agenda"]; 
+    const viewsOption = ["month", "week", "quarter"] as const;
 
     const eventPropGetter = (event: CalEvent) => {
-        const shouldApplyBackground = currentView === "week" || (currentView === "month" && event.filter === "eventinfo");
+        const shouldApplyBackground = currentView === "week" || (currentView === "month" && event.display === "eventinfo");
 
         return {
             style: {
@@ -415,7 +412,7 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                 toolbar={false}
                 view={currentView ?? props.defaultView}
                 date={props.dateAttribute?.value ?? new Date()}
-                onView={(newView: "month" | "week" | "day") => {
+                onView={(newView: "month" | "week" | "quarter") => {
                     props.viewAttribute?.setValue?.(newView);
                 }}
                 onNavigate={(newDate: Date) => {
