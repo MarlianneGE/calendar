@@ -10,6 +10,17 @@
         <propertyGroup caption="General">
             <!-- OPTIONS SOURCE -->
             <propertyGroup caption="Data source">
+                <property key="datesSelected" type="datasource" isList="true" required="false">
+                    <caption>Date(s) Selected</caption>
+                    <description></description>
+                </property>
+                <property key="selectedDateAttr" type="attribute" dataSource="datesSelected" required="false">
+                    <caption>Selected Date Attribute</caption>
+                    <description>Attribute on the Dates (s) Selected entity that contains the date.</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime" />
+                    </attributeTypes>
+                </property>
                 <property key="databaseDataSource" type="datasource" isList="true" required="false">
                     <caption>Events</caption>
                     <description />

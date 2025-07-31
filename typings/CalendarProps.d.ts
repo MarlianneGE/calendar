@@ -31,6 +31,8 @@ export interface CalendarContainerProps {
     class: string;
     style?: CSSProperties;
     tabIndex?: number;
+    datesSelected?: ListValue;
+    selectedDateAttr?: ListAttributeValue<Date>;
     databaseDataSource?: ListValue;
     dateAttribute?: EditableValue<Date>;
     viewAttribute?: EditableValue<string>;
@@ -78,6 +80,8 @@ export interface CalendarPreviewProps {
     readOnly: boolean;
     renderMode: "design" | "xray" | "structure";
     translate: (text: string) => string;
+    datesSelected: {} | { caption: string } | { type: string } | null;
+    selectedDateAttr: string;
     databaseDataSource: {} | { caption: string } | { type: string } | null;
     dateAttribute: string;
     viewAttribute: string;

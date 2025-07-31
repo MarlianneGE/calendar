@@ -273,6 +273,16 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         );
     };
 
+    // get the selected dates list 
+    const selectedDates = useMemo(() => {
+        const items = props.datesSelected?.items ?? [];
+        if (items.length === 0) return [];
+        return items.map(item => {
+            const value = props.selectedDateAttr?.get(item)?.value;
+            return value ? new Date(value.setHours(0, 0, 0, 0)) : null;
+        }).filter((date): date is Date => !!date);
+    }, [props.datesSelected?.items]);
+
     // for the month view only 
     const CustomMonthDateHeader = ({ label, date, ungroupedEvents }: { label: string, date: Date, ungroupedEvents: CalEvent[] }) => {
         const isToday = new Date().toDateString() === date.toDateString();
@@ -283,10 +293,20 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                 new Date(event.start).toDateString() === date.toDateString()
         );
 
+        const normalizedDate = new Date(date);
+        normalizedDate.setHours(0, 0, 0, 0);
+        // const isSelected = selectedDates.some(
+        //     selectedDate => selectedDate.toDateString() === normalizedDate.toDateString()
+        // );
+         const isSelected = selectedDates.some(
+            selected => selected.getTime() === normalizedDate.getTime()
+        );
+
         const className = [
             "rbc-date-cell",
             !hasTimeslot ? "no-timeslot-cell" : "",
-            isToday ? "rbc-now" : ""
+            isToday ? "rbc-now" : "",
+            isSelected ? "selected" : ""
         ]
             .filter(Boolean)
             .join(" ");
@@ -411,6 +431,7 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                 onShowMore={onShowMore}
                 popup={false}
                 drilldownView={null}
+                scrollToTime={new Date(1970, 1, 1, 6, 0, 0)} // Scroll to 6am, the date does not matter here, just need a date with the time that you want 
             />
         </div>
     );
