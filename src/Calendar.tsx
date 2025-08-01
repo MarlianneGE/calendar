@@ -9,16 +9,15 @@ import { format, startOfWeek } from 'date-fns';
 import * as dateFns from "date-fns";
 
 
-// Event content is customized based on icons or eventInfo and allDay or timed events and week or month view 
 const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
-     const { text2, allDay, text1 } = event;
+     const { text1, allDay, text2 } = event;
     return allDay ? (
-        <div className="allDay-event">
+        <div className={`allDay-event`}>
             <p>{text1}</p>
             <strong>{text2}</strong>
         </div>
     ) : (
-        <div className="timed-event">
+        <div className={`timed-event`}>
             <p>{text1}</p>
             <strong>{text2}</strong>
         </div>
@@ -31,14 +30,19 @@ interface CustomMonthEventProps {
 
 }
 
+// Event content is customized based on icons or eventInfo display  
 const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const isPast = event.end < today;
+    const dimClass = isPast ? "rbc-day-dimmed" : "";
     if (event.display === "icons" && event.icons && event.icons.length > 0) {
         const maxToShow = 3;
         const visible = event.icons.slice(0, maxToShow);
         const hiddenCount = event.icons.length - visible.length;
 
         return (
-            <div className="icon-row">
+            <div className={`icon-row ${dimClass}`}>
                 <div className="circle-row">
                     {visible.map((color, i) => (
                         <span
@@ -70,7 +74,7 @@ const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => 
 
     if (event.display === "eventinfo") {
         return (
-            <div className="event-info">
+            <div className={`event-info ${dimClass}`}>
                 <p>{event.text1}</p>
                 <strong>{event.text2}</strong>
             </div>
@@ -292,18 +296,17 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
 
         const normalizedDate = new Date(date);
         normalizedDate.setHours(0, 0, 0, 0);
-        // const isSelected = selectedDates.some(
-        //     selectedDate => selectedDate.toDateString() === normalizedDate.toDateString()
-        // );
-         const isSelected = selectedDates.some(
+        const isSelected = selectedDates.some(
             selected => selected.getTime() === normalizedDate.getTime()
         );
+        const isPast = normalizedDate < new Date(new Date().setHours(0,0,0,0));
 
         const className = [
             "rbc-date-cell",
             !hasTimeslot ? "no-timeslot-cell" : "",
             isToday ? "rbc-now" : "",
-            isSelected ? "selected" : ""
+            isSelected ? "selected" : "",
+            isPast ? "rbc-day-dimmed" : ""
         ]
             .filter(Boolean)
             .join(" ");
