@@ -39,6 +39,17 @@
             </property> 
         </propertyGroup>
         <propertyGroup caption="Calendar Events">
+            <property key="timeslotEvents" type="datasource" isList="true" required="false">
+                <caption>Timeslot Events</caption>
+                <description>A list of timeslot events so that missing timeslots can be flagged</description>
+            </property>
+            <property key="timeslotStartAttribute" type="attribute" dataSource="timeslotEvents" required="false">
+                <caption>Start Date for Timeslots</caption>
+                <description>Start date for timeslot events</description>
+                <attributeTypes>
+                    <attributeType name="DateTime" />
+                </attributeTypes>
+            </property>
             <property key="databaseDataSource" type="datasource" isList="true" required="false">
                 <caption>Events</caption>
                 <description />

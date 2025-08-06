@@ -262,49 +262,92 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
  
     }), []);
 
+    // get the selected dates list 
+    const selectedDates = (props.datesSelected?.items ?? [])
+        .map(item => {
+            const value = props.selectedDateAttr?.get(item)?.value;
+            return value ? new Date(value.setHours(0, 0, 0, 0)) : null;
+        })
+        .filter((date): date is Date => !!date);
+
+    // get the timeslot events and create a set of dates that have timeslots
+    // this is used to determine if a date cell in the month view has a timeslot
+    // and to apply the "no-timeslot-cell" class to those that do not have
+    // timeslots, so that they can be styled differently 
+    const timeslotItems = props.timeslotEvents?.items ?? [];
+    const timeslotDateSet = new Set<string>(
+        timeslotItems
+            .map(item => props.timeslotStartAttribute?.get(item)?.value)
+            .filter((date): date is Date => !!date)
+            .map(date => date.toDateString())
+    );
+
     // header for the week view 
     const CustomWeekHeader = ({ date }: { date: Date }) => {
         const dayLetter = format(date, 'EEEEE'); // first letter of the weekday, ie. "M"
         const dayNumber = format(date, 'd');     // day of the month, ie. "3"
+
+        // Normalize input date
+        const normalizedDate = new Date(date);
+        normalizedDate.setHours(0, 0, 0, 0);
+
+        // Normalize today's date
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const isToday = normalizedDate.getTime() === today.getTime();
+
+        const hasTimeslot = timeslotDateSet.has(normalizedDate.toDateString());
+
+        const className = [
+            "custom-week-header",
+            !hasTimeslot ? "no-timeslot-cell" : ""
+        ]
+            .filter(Boolean)
+            .join(" ");
+
         return (
-            <div className="custom-week-header">
-                <div className="custom-week-header-letter">{dayLetter}</div>
-                <div className="custom-week-header-number">{dayNumber}</div>
+            <div className={className}>
+                {isToday ? (
+                    <span className="week-today-inner">
+                        <div className="custom-week-header-letter">{dayLetter}</div>
+                        <div className="custom-week-header-number">{dayNumber}</div>
+                    </span>
+                ) : (
+                    <span>
+                        <div className="custom-week-header-letter">{dayLetter}</div>
+                        <div className="custom-week-header-number">{dayNumber}</div>
+                    </span>
+                )}
             </div>
         );
     };
 
-    // get the selected dates list 
-    const selectedDates = useMemo(() => {
-        const items = props.datesSelected?.items ?? [];
-        if (items.length === 0) return [];
-        return items.map(item => {
-            const value = props.selectedDateAttr?.get(item)?.value;
-            return value ? new Date(value.setHours(0, 0, 0, 0)) : null;
-        }).filter((date): date is Date => !!date);
-    }, [props.datesSelected?.items]);
-
     // for the month view only 
-    const CustomMonthDateHeader = ({ label, date, ungroupedEvents }: { label: string, date: Date, ungroupedEvents: CalEvent[] }) => {
-        const isToday = new Date().toDateString() === date.toDateString();
+    const CustomMonthDateHeader = ({ label, date }: { label: string, date: Date }) => {
 
-        const hasTimeslot = ungroupedEvents.some(
-            event =>
-                event.type === "Timeslot" &&
-                new Date(event.start).toDateString() === date.toDateString()
-        );
+        const hasTimeslot = timeslotDateSet.has(date.toDateString());
 
+        // Normalize input date
         const normalizedDate = new Date(date);
         normalizedDate.setHours(0, 0, 0, 0);
+
+        // Normalize today's date
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const isToday = normalizedDate.getTime() === today.getTime();
+
         const isSelected = selectedDates.some(
             selected => selected.getTime() === normalizedDate.getTime()
         );
         const isPast = normalizedDate < new Date(new Date().setHours(0,0,0,0));
 
+        console.log("selectedDates", selectedDates); 
+
         const className = [
             "rbc-date-cell",
             !hasTimeslot ? "no-timeslot-cell" : "",
-            isToday ? "rbc-now" : "",
             isSelected ? "selected" : "",
             isPast ? "rbc-day-dimmed" : ""
         ]
@@ -314,7 +357,7 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         return (
             <div className={className}>
                 {isToday ? (
-                    <span className="today-inner">{label}</span>
+                    <span className="month-today-inner">{label}</span>
                 ) : (
                     label
                 )}
@@ -399,7 +442,6 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                         <CustomMonthDateHeader
                             label={label}
                             date={date}
-                            ungroupedEvents={expanded}
                         />
                     ),
                     month: {

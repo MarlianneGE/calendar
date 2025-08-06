@@ -31,6 +31,8 @@ export interface CalendarContainerProps {
     viewAttribute?: EditableValue<string>;
     defaultView: DefaultViewEnum;
     displayType?: EditableValue<string>;
+    timeslotEvents?: ListValue;
+    timeslotStartAttribute?: ListAttributeValue<Date>;
     databaseDataSource?: ListValue;
     eventTypeAttribute?: ListAttributeValue<string>;
     allDayAttribute?: ListAttributeValue<boolean>;
@@ -76,6 +78,8 @@ export interface CalendarPreviewProps {
     viewAttribute: string;
     defaultView: DefaultViewEnum;
     displayType: string;
+    timeslotEvents: {} | { caption: string } | { type: string } | null;
+    timeslotStartAttribute: string;
     databaseDataSource: {} | { caption: string } | { type: string } | null;
     eventTypeAttribute: string;
     allDayAttribute: string;
