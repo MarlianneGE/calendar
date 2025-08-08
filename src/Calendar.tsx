@@ -270,17 +270,19 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         })
         .filter((date): date is Date => !!date);
 
-    // get the timeslot events and create a set of dates that have timeslots
-    // this is used to determine if a date cell in the month view has a timeslot
-    // and to apply the "no-timeslot-cell" class to those that do not have
-    // timeslots, so that they can be styled differently 
+    // get the timeslot events  
     const timeslotItems = props.timeslotEvents?.items ?? [];
-    const timeslotDateSet = new Set<string>(
-        timeslotItems
-            .map(item => props.timeslotStartAttribute?.get(item)?.value)
-            .filter((date): date is Date => !!date)
-            .map(date => date.toDateString())
-    );
+    // Build a map of how many timeslots exist per day
+    const timeslotCountMap = new Map<string, number>();
+
+    for (const item of timeslotItems) {
+        const date = props.timeslotStartAttribute?.get(item)?.value;
+        if (date) {
+            const dayKey = date.toDateString();
+            const currentCount = timeslotCountMap.get(dayKey) ?? 0;
+            timeslotCountMap.set(dayKey, currentCount + 1);
+        }
+    }
 
     // header for the week view 
     const CustomWeekHeader = ({ date }: { date: Date }) => {
@@ -297,11 +299,12 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
 
         const isToday = normalizedDate.getTime() === today.getTime();
 
-        const hasTimeslot = timeslotDateSet.has(normalizedDate.toDateString());
+        const dayKey = normalizedDate.toDateString();
+        const timeslotCount = timeslotCountMap.get(dayKey) ?? 0;
 
         const className = [
             "custom-week-header",
-            !hasTimeslot ? "no-timeslot-cell" : ""
+            timeslotCount !== 1 ? "timeslot-error-flag" : ""
         ]
             .filter(Boolean)
             .join(" ");
@@ -326,8 +329,6 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
     // for the month view only 
     const CustomMonthDateHeader = ({ label, date }: { label: string, date: Date }) => {
 
-        const hasTimeslot = timeslotDateSet.has(date.toDateString());
-
         // Normalize input date
         const normalizedDate = new Date(date);
         normalizedDate.setHours(0, 0, 0, 0);
@@ -343,11 +344,12 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         );
         const isPast = normalizedDate < new Date(new Date().setHours(0,0,0,0));
 
-        console.log("selectedDates", selectedDates); 
+        const dayKey = normalizedDate.toDateString();
+        const timeslotCount = timeslotCountMap.get(dayKey) ?? 0;
 
         const className = [
             "rbc-date-cell",
-            !hasTimeslot ? "no-timeslot-cell" : "",
+            timeslotCount !== 1 ? "timeslot-error-flag" : "",
             isSelected ? "selected" : "",
             isPast ? "rbc-day-dimmed" : ""
         ]
