@@ -475,6 +475,7 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                 onShowMore={onShowMore}
                 popup={false}
                 drilldownView={null}
+                dayLayoutAlgorithm="no-overlap"
                 scrollToTime={new Date(1970, 1, 1, 6, 0, 0)} // Scroll to 6am, the date does not matter here, just need a date with the time that you want 
             />
         </div>
