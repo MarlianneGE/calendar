@@ -5,7 +5,7 @@ import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CalendarContainerProps } from "../typings/CalendarProps";
 import { constructWrapperStyle } from "./utils/utils";
-import { format, startOfWeek } from 'date-fns';  
+import { format, startOfWeek, startOfMonth, endOfMonth } from 'date-fns';  
 import * as dateFns from "date-fns";
 
 
@@ -118,8 +118,6 @@ function groupIconEventsByDay(events: CalEvent[], view: string): CalEvent[] {
 
     return [...result, ...groupedMap.values()];
 }
-
-
 
 const localizer = dateFnsLocalizer({
     format: dateFns.format,
@@ -329,6 +327,10 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
     // for the month view only 
     const CustomMonthDateHeader = ({ label, date }: { label: string, date: Date }) => {
 
+        if (!isInQuarter(date)) {
+            return null; // Hide header for days outside the quarter
+        }
+
         // Normalize input date
         const normalizedDate = new Date(date);
         normalizedDate.setHours(0, 0, 0, 0);
@@ -367,7 +369,38 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         );
     };
 
+    const rawQuarterStart = props.quarterStart?.value ?? new Date();
+    const rawQuarterEnd = props.quarterEnd?.value ?? new Date();
+
+    const quarterStart = startOfMonth(rawQuarterStart);
+    const quarterEnd = endOfMonth(rawQuarterEnd);
+
+    const isInQuarter = (date: Date): boolean =>
+        date >= quarterStart && date <= quarterEnd;
+
+    const QuarterDateCellWrapper = (props: any) => {
+        const { children, value } = props;
+        // const inQuarter = isInQuarter(value);
+
+        // return (
+        //     <div className={inQuarter ? "in-quarter" : "out-of-quarter"}>
+        //         {children}
+        //     </div>
+        // );
+
+        if (!isInQuarter(value)) {
+            return <div style={{ visibility: "hidden", height: "100%" }}>{children}</div>;
+        }
+
+        return children;
+    };
+
+
     const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
+        if (!isInQuarter(slotInfo.start)) {
+            return; // Ignore clicks outside quarter
+        }
+
         // Set clicked date attribute in Mendix 
         if (props.clickedDate && props.clickedDate.setValue) {
             props.clickedDate.setValue(slotInfo.start); 
@@ -380,6 +413,10 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
     };
 
     const handleSelectEvent = (event: CalEvent) => {
+        if (!isInQuarter(event.start)) {
+            return; // Ignore events outside quarter
+        }
+
         // Set clicked date attribute in Mendix
         if (props.clickedDate && props.clickedDate.setValue) {
             props.clickedDate.setValue(event.start); 
@@ -454,16 +491,20 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                         />
                         )
                     },
+                    dateCellWrapper: QuarterDateCellWrapper, 
                 }}
                 formats={formats}
                 toolbar={false}
                 view={currentView ?? props.defaultView}
-                date={props.dateAttribute?.value ?? new Date()}
+                date={props.dateExpression?.value ?? new Date()}
                 onView={(newView: "month" | "week" | "quarter") => {
                     props.viewAttribute?.setValue?.(newView);
                 }}
                 onNavigate={(newDate: Date) => {
-                    props.dateAttribute?.setValue?.(newDate);
+                    if ("setValue" in (props.dateExpression ?? {})) {
+                        // @ts-expect-error: setValue may exist on runtime Mendix object
+                        props.dateExpression.setValue(newDate);
+                    }
                 }}
                 selectable={true}
                 onSelectSlot={handleSelectSlot} // empty space on calendar 

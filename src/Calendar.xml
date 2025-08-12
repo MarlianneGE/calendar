@@ -8,12 +8,10 @@
     <icon/>
     <properties>
         <propertyGroup caption="General">
-            <property key="dateAttribute" type="attribute" required="false">
-                <caption>Date attribute</caption>
+            <property key="dateExpression" type="expression" required="false">
+                <caption>Date</caption>
                 <description>The date that should be shown in the view</description>
-                <attributeTypes>
-                    <attributeType name="DateTime" />
-                </attributeTypes>
+                <returnType type="DateTime" />
             </property>
             <property key="viewAttribute" type="attribute" required="false">
                 <caption>View attribute</caption>
@@ -37,6 +35,16 @@
                     <attributeType name="Enum" />
                 </attributeTypes>
             </property> 
+            <property key="quarterStart" type="expression" required="false">
+                <caption>Quarter Start Date</caption>
+                <description>The date for the start of the quarter.</description>
+                <returnType type="DateTime" />
+            </property>
+            <property key="quarterEnd" type="expression" required="false">
+                <caption>Quarter End Date</caption>
+                <description>The date for the end of the quarter.</description>
+                <returnType type="DateTime" />
+            </property>
         </propertyGroup>
         <propertyGroup caption="Calendar Events">
             <property key="timeslotEvents" type="datasource" isList="true" required="false">

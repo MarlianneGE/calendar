@@ -4,7 +4,7 @@
  * @author Mendix Widgets Framework Team
  */
 import { CSSProperties } from "react";
-import { ActionValue, EditableValue, ListValue, ListAttributeValue, ListExpressionValue } from "mendix";
+import { ActionValue, DynamicValue, EditableValue, ListValue, ListAttributeValue, ListExpressionValue } from "mendix";
 
 export type DefaultViewEnum = "week" | "month";
 
@@ -27,10 +27,12 @@ export interface CalendarContainerProps {
     class: string;
     style?: CSSProperties;
     tabIndex?: number;
-    dateAttribute?: EditableValue<Date>;
+    dateExpression?: DynamicValue<Date>;
     viewAttribute?: EditableValue<string>;
     defaultView: DefaultViewEnum;
     displayType?: EditableValue<string>;
+    quarterStart?: DynamicValue<Date>;
+    quarterEnd?: DynamicValue<Date>;
     timeslotEvents?: ListValue;
     timeslotStartAttribute?: ListAttributeValue<Date>;
     databaseDataSource?: ListValue;
@@ -74,10 +76,12 @@ export interface CalendarPreviewProps {
     readOnly: boolean;
     renderMode: "design" | "xray" | "structure";
     translate: (text: string) => string;
-    dateAttribute: string;
+    dateExpression: string;
     viewAttribute: string;
     defaultView: DefaultViewEnum;
     displayType: string;
+    quarterStart: string;
+    quarterEnd: string;
     timeslotEvents: {} | { caption: string } | { type: string } | null;
     timeslotStartAttribute: string;
     databaseDataSource: {} | { caption: string } | { type: string } | null;
