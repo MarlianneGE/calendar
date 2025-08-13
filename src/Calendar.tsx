@@ -10,16 +10,16 @@ import * as dateFns from "date-fns";
 
 
 const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
-     const { text1, allDay, text2 } = event;
+     const { header, allDay, description } = event;
     return allDay ? (
         <div className={`allDay-event`}>
-            <p>{text1}</p>
-            <strong>{text2}</strong>
+            <p>{header}</p>
+            <strong>{description}</strong>
         </div>
     ) : (
         <div className={`timed-event`}>
-            <p>{text1}</p>
-            <strong>{text2}</strong>
+            <p>{header}</p>
+            <strong>{description}</strong>
         </div>
     );
 };
@@ -75,8 +75,8 @@ const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => 
     if (event.display === "eventinfo") {
         return (
             <div className={`event-info ${dimClass}`}>
-                <p>{event.text1}</p>
-                <strong>{event.text2}</strong>
+                <p>{event.header}</p>
+                <strong>{event.description}</strong>
             </div>
         );
     }
@@ -106,7 +106,7 @@ function groupIconEventsByDay(events: CalEvent[], view: string): CalEvent[] {
                 groupedMap.set(dayKey, {
                     ...event,
                     display: "icons",
-                    text2: "",            // suppress text2
+                    description: "",            // suppress description
                     icons: [event.fontColor || "#999"], // custom field for grouped icons
                 });
             } else {
@@ -128,7 +128,7 @@ const localizer = dateFnsLocalizer({
 });
 
 interface CalEvent {
-    text2: string;
+    description: string;
     start: Date;
     end: Date;
     allDay: boolean;
@@ -137,7 +137,7 @@ interface CalEvent {
     icons?: string[];
     fontColor?: string;
     backgroundColor?: string;
-    text1?: string;
+    header?: string;
     type?: string;
 }
 
@@ -193,18 +193,18 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
     const items = props.databaseDataSource?.items ?? [];
 
     const rawEvents: CalEvent[] = items.map(item => {
-        const text1 =
-            props.text1 === "attribute" && props.text1Attribute
-                ? (props.text1Attribute.get(item).value ?? "")
-                : props.text1 === "expression" && props.text1Expression
-                  ? (props.text1Expression.get(item).value ?? "")
+        const header =
+            props.header === "attribute" && props.headerAttribute
+                ? (props.headerAttribute.get(item).value ?? "")
+                : props.header === "expression" && props.headerExpression
+                  ? (props.headerExpression.get(item).value ?? "")
                   : "";
 
-        const text2 =
-            props.text2 === "attribute" && props.text2Attribute
-                ? (props.text2Attribute.get(item).value ?? "")
-                : props.text2 === "expression" && props.text2Expression
-                  ? (props.text2Expression.get(item).value ?? "")
+        const description =
+            props.description === "attribute" && props.descriptionAttribute
+                ? (props.descriptionAttribute.get(item).value ?? "")
+                : props.description === "expression" && props.descriptionExpression
+                  ? (props.descriptionExpression.get(item).value ?? "")
                   : "";
 
         const start = props.startAttribute?.get(item).value ?? new Date();
@@ -216,7 +216,7 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         const display = rawdisplay ? rawdisplay.toString().toLowerCase() : "";
         const type = props.eventTypeAttribute?.get(item)?.value ?? "";
 
-        return { text2, start, end, fontColor, backgroundColor, allDay, display, text1, type }; 
+        return { description, start, end, fontColor, backgroundColor, allDay, display, header, type }; 
     });
 
     const expanded = expandMultiDayEvents(rawEvents, currentView);
@@ -268,17 +268,16 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         })
         .filter((date): date is Date => !!date);
 
-    // get the timeslot events  
-    const timeslotItems = props.timeslotEvents?.items ?? [];
-    // Build a map of how many timeslots exist per day
-    const timeslotCountMap = new Map<string, number>();
-
-    for (const item of timeslotItems) {
-        const date = props.timeslotStartAttribute?.get(item)?.value;
-        if (date) {
+    // get the flags  
+    const flagList = props.flags?.items ?? [];
+    // Build a map of name and day 
+    const flagMap = new Map<string, string>();
+    for (const item of flagList) {
+        const date = props.flagDateAttribute?.get(item)?.value;
+        const name = props.flagNameAttribute?.get(item)?.value;
+        if (date && name) {
             const dayKey = date.toDateString();
-            const currentCount = timeslotCountMap.get(dayKey) ?? 0;
-            timeslotCountMap.set(dayKey, currentCount + 1);
+            flagMap.set(dayKey, name ?? "default-flag");
         }
     }
 
@@ -298,11 +297,11 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         const isToday = normalizedDate.getTime() === today.getTime();
 
         const dayKey = normalizedDate.toDateString();
-        const timeslotCount = timeslotCountMap.get(dayKey) ?? 0;
+        const flagClass = flagMap.get(dayKey);
 
         const className = [
             "custom-week-header",
-            timeslotCount !== 1 ? "timeslot-error-flag" : ""
+            flagClass
         ]
             .filter(Boolean)
             .join(" ");
@@ -347,11 +346,11 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         const isPast = normalizedDate < new Date(new Date().setHours(0,0,0,0));
 
         const dayKey = normalizedDate.toDateString();
-        const timeslotCount = timeslotCountMap.get(dayKey) ?? 0;
+        const flagClass = flagMap.get(dayKey);
 
         const className = [
             "rbc-date-cell",
-            timeslotCount !== 1 ? "timeslot-error-flag" : "",
+            flagClass,
             isSelected ? "selected" : "",
             isPast ? "rbc-day-dimmed" : ""
         ]

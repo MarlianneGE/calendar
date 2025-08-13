@@ -8,244 +8,267 @@
     <icon/>
     <properties>
         <propertyGroup caption="General">
-            <property key="dateExpression" type="expression" required="false">
-                <caption>Date</caption>
-                <description>The date that should be shown in the view</description>
-                <returnType type="DateTime" />
-            </property>
-            <property key="viewAttribute" type="attribute" required="false">
-                <caption>View attribute</caption>
-                <description>The desired view, either week, month or quarter</description>
-                <attributeTypes>
-                    <attributeType name="Enum" />
-                </attributeTypes>
-            </property>
-            <property key="defaultView" type="enumeration" defaultValue="month">
-                <caption>Initial (default) view</caption>
-                <description></description>
-                <enumerationValues>
-                    <enumerationValue key="week">Week</enumerationValue>
-                    <enumerationValue key="month">Month</enumerationValue>
-                </enumerationValues>
-            </property>
-            <property key="displayType" type="attribute" required="false">
-                <caption>Display Type attribute</caption>
-                <description>Select an attribute that contains the display type of Icon circles or EventInfo</description>
-                <attributeTypes>
-                    <attributeType name="Enum" />
-                </attributeTypes>
-            </property> 
-            <property key="quarterStart" type="expression" required="false">
-                <caption>Quarter Start Date</caption>
-                <description>The date for the start of the quarter.</description>
-                <returnType type="DateTime" />
-            </property>
-            <property key="quarterEnd" type="expression" required="false">
-                <caption>Quarter End Date</caption>
-                <description>The date for the end of the quarter.</description>
-                <returnType type="DateTime" />
-            </property>
+            <propertyGroup caption="General">
+                <property key="dateExpression" type="expression" required="false">
+                    <caption>Date</caption>
+                    <description>The date that should be shown in the view</description>
+                    <returnType type="DateTime" />
+                </property>
+                <property key="viewAttribute" type="attribute" required="false">
+                    <caption>View attribute</caption>
+                    <description>The desired view, either week, month or quarter</description>
+                    <attributeTypes>
+                        <attributeType name="Enum" />
+                    </attributeTypes>
+                </property>
+                <property key="defaultView" type="enumeration" defaultValue="month">
+                    <caption>Initial (default) view</caption>
+                    <description></description>
+                    <enumerationValues>
+                        <enumerationValue key="week">Week</enumerationValue>
+                        <enumerationValue key="month">Month</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="displayType" type="attribute" required="false">
+                    <caption>Display Type attribute</caption>
+                    <description>Select an attribute that contains the display type of Icon circles or EventInfo</description>
+                    <attributeTypes>
+                        <attributeType name="Enum" />
+                    </attributeTypes>
+                </property> 
+                <property key="quarterStart" type="expression" required="false">
+                    <caption>Quarter Start Date</caption>
+                    <description>The date for the start of the quarter.</description>
+                    <returnType type="DateTime" />
+                </property>
+                <property key="quarterEnd" type="expression" required="false">
+                    <caption>Quarter End Date</caption>
+                    <description>The date for the end of the quarter.</description>
+                    <returnType type="DateTime" />
+                </property>
+            </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Calendar Events">
-            <property key="timeslotEvents" type="datasource" isList="true" required="false">
-                <caption>Timeslot Events</caption>
-                <description>A list of timeslot events so that missing timeslots can be flagged</description>
-            </property>
-            <property key="timeslotStartAttribute" type="attribute" dataSource="timeslotEvents" required="false">
-                <caption>Start Date for Timeslots</caption>
-                <description>Start date for timeslot events</description>
-                <attributeTypes>
-                    <attributeType name="DateTime" />
-                </attributeTypes>
-            </property>
-            <property key="databaseDataSource" type="datasource" isList="true" required="false">
-                <caption>Events</caption>
-                <description />
-            </property>
-            <property key="eventTypeAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                <caption>Event Type attribute</caption>
-                <description>Select an attribute that contains the event type</description>
-                <attributeTypes>
-                    <attributeType name="Enum" />
-                </attributeTypes>
-            </property>   
-            <property key="allDayAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                <caption>All day attribute</caption>
-                <description>Boolean for if the event is all day or not</description>
-                <attributeTypes>
-                    <attributeType name="Boolean" />
-                </attributeTypes>
-            </property>
-            <property key="startAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                <caption>Start Date/Time attribute</caption>
-                <description />
-                <attributeTypes>
-                    <attributeType name="DateTime" />
-                </attributeTypes>
-            </property>
-            <property key="endAttribute" type="attribute" dataSource="databaseDataSource" required="false">
-                <caption>End Date/Time attribute</caption>
-                <description />
-                <attributeTypes>
-                    <attributeType name="DateTime" />
-                </attributeTypes>
-            </property>
-            <property key="text1" type="enumeration" defaultValue="attribute">
-                <caption>First Text</caption>
-                <description>Choose between an attribute or an expression for the first text to display</description>
-                <enumerationValues>
-                    <enumerationValue key="attribute">Attribute</enumerationValue>
-                    <enumerationValue key="expression">Expression</enumerationValue>
-                </enumerationValues>
-            </property>
-            <property key="text1Attribute" type="attribute" dataSource="databaseDataSource" required="false">
-                <caption>First Text attribute</caption>
-                <description></description>
-                <attributeTypes>
-                    <attributeType name="Enum" />
-                    <attributeType name="String" />
-                </attributeTypes>
-            </property>
-            <property key="text1Expression" type="expression" dataSource="databaseDataSource" required="false">
-                <caption>First Text expression</caption>
-                <description></description>
-                <returnType type="String" />
-            </property>
-            <property key="text2" type="enumeration" defaultValue="attribute">
-                <caption>Second Text</caption>
-                <description>Choose between an attribute or an expression for the second text to display</description>
-                <enumerationValues>
-                    <enumerationValue key="attribute">Attribute</enumerationValue>
-                    <enumerationValue key="expression">Expression</enumerationValue>
-                </enumerationValues>
-            </property>
-            <property key="text2Attribute" type="attribute" dataSource="databaseDataSource" required="false">
-                <caption>Second Text attribute</caption>
-                <description></description>
-                <attributeTypes>
-                    <attributeType name="String" />
-                </attributeTypes>
-            </property>
-            <property key="text2Expression" type="expression" dataSource="databaseDataSource" required="false">
-                <caption>Second Text expression</caption>
-                <description></description>
-                <returnType type="String" />
-            </property>
-            <property key="eventBackgroundColor" type="attribute" dataSource="databaseDataSource" required="false">
-                <caption>Background Color</caption>
-                <description>Attribute containing a valid html color</description>
-                <attributeTypes>
-                    <attributeType name="Enum" />
-                    <attributeType name="String" />
-                </attributeTypes>
-            </property>
-            <property key="eventFontColor" type="attribute" dataSource="databaseDataSource" required="false">
-                <caption>Font Color</caption>
-                <description>Attribute containing a valid html color</description>
-                <attributeTypes>
-                    <attributeType name="Enum" />
-                    <attributeType name="String" />
-                </attributeTypes>
-            </property>
+            <propertyGroup caption="Date Source">
+                <property key="databaseDataSource" type="datasource" isList="true" required="false">
+                    <caption>Events</caption>
+                    <description />
+                </property>
+                <property key="eventTypeAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>Event Type attribute</caption>
+                    <description>Select an attribute that contains the event type</description>
+                    <attributeTypes>
+                        <attributeType name="Enum" />
+                    </attributeTypes>
+                </property>   
+                <property key="allDayAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>All day attribute</caption>
+                    <description>Boolean for if the event is all day or not</description>
+                    <attributeTypes>
+                        <attributeType name="Boolean" />
+                    </attributeTypes>
+                </property>
+                <property key="startAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>Start Date/Time attribute</caption>
+                    <description />
+                    <attributeTypes>
+                        <attributeType name="DateTime" />
+                    </attributeTypes>
+                </property>
+                <property key="endAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>End Date/Time attribute</caption>
+                    <description />
+                    <attributeTypes>
+                        <attributeType name="DateTime" />
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+            <propertyGroup caption="Event Information">
+                <property key="header" type="enumeration" defaultValue="attribute">
+                    <caption>Event Header Text</caption>
+                    <description>Choose between an attribute or an expression for the header text to display</description>
+                    <enumerationValues>
+                        <enumerationValue key="attribute">Attribute</enumerationValue>
+                        <enumerationValue key="expression">Expression</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="headerAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>Header Attribute</caption>
+                    <description></description>
+                    <attributeTypes>
+                        <attributeType name="Enum" />
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+                <property key="headerExpression" type="expression" dataSource="databaseDataSource" required="false">
+                    <caption>Header Expression</caption>
+                    <description></description>
+                    <returnType type="String" />
+                </property>
+                <property key="description" type="enumeration" defaultValue="attribute">
+                    <caption>Event Description Text</caption>
+                    <description>Choose between an attribute or an expression for the description to display</description>
+                    <enumerationValues>
+                        <enumerationValue key="attribute">Attribute</enumerationValue>
+                        <enumerationValue key="expression">Expression</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="descriptionAttribute" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>Description Attribute</caption>
+                    <description></description>
+                    <attributeTypes>
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+                <property key="descriptionExpression" type="expression" dataSource="databaseDataSource" required="false">
+                    <caption>Description Expression</caption>
+                    <description></description>
+                    <returnType type="String" />
+                </property>
+                <property key="eventBackgroundColor" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>Background Color</caption>
+                    <description>Attribute containing a valid html color</description>
+                    <attributeTypes>
+                        <attributeType name="Enum" />
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+                <property key="eventFontColor" type="attribute" dataSource="databaseDataSource" required="false">
+                    <caption>Font Color</caption>
+                    <description>Attribute containing a valid html color</description>
+                    <attributeTypes>
+                        <attributeType name="Enum" />
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
+        </propertyGroup>
+        <propertyGroup caption="Flags">
+            <propertyGroup caption="Flags">
+                <property key="flags" type="datasource" isList="true" required="false">
+                    <caption>Flag Events</caption>
+                    <description>A list of flags</description>
+                </property>
+                <property key="flagDateAttribute" type="attribute" dataSource="flags" required="false">
+                    <caption>Flag Date</caption>
+                    <description>Date for the flag</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime" />
+                    </attributeTypes>
+                </property>
+                <property key="flagNameAttribute" type="attribute" dataSource="flags" required="false">
+                    <caption>Flag Name</caption>
+                    <description>Name will be added as a class to the header of the flag's date</description>
+                    <attributeTypes>
+                        <attributeType name="String" />
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Date Picker">
-            <property key="datesSelected" type="datasource" isList="true" required="false">
-                <caption>Dates Selected</caption>
-                <description>A list of entities for the selected dates the user has chosen.</description>
-            </property>
-            <property key="selectedDateAttr" type="attribute" dataSource="datesSelected" required="false">
-                <caption>Selected Date Attribute</caption>
-                <description>Attribute on the Dates Selected entity that contains the date.</description>
-                <attributeTypes>
-                    <attributeType name="DateTime" />
-                </attributeTypes>
-            </property>
+            <propertyGroup caption="When the calendar is used as a date picker">
+                <property key="datesSelected" type="datasource" isList="true" required="false">
+                    <caption>Dates Selected</caption>
+                    <description>A list of entities for the selected dates the user has chosen.</description>
+                </property>
+                <property key="selectedDateAttr" type="attribute" dataSource="datesSelected" required="false">
+                    <caption>Selected Date Attribute</caption>
+                    <description>Attribute on the Dates Selected entity that contains the date.</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime" />
+                    </attributeTypes>
+                </property>
+            </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="On Click">
-            <property key="clickedDate" type="attribute" required="false">
-                <caption>Clicked Date</caption>
-                <description>The date that was clicked. Used to pass to onClick action.</description>
-                <attributeTypes>
-                    <attributeType name="DateTime" />
-                </attributeTypes>
-            </property>
-            <property key="onClickEvent" type="action" required="false">
-                <caption>On click action</caption>
-                <description />
-            </property>
-            <property key="onClickEmpty" type="action" required="false">
-                <caption>On click empty</caption>
-                <description>Triggered when an empty time slot is selected</description>
-            </property>
-            <property key="onClickShowMore" type="action" required="false">
-                <caption>On click of the +${count} text </caption>
-                <description>Triggered when the show more text is clicked</description>
-            </property>
+            <propertyGroup caption="Clicked Date">
+                <property key="clickedDate" type="attribute" required="false">
+                    <caption>Attribute</caption>
+                    <description>Attribute that stores the date that was clicked. Passed to onClick actions.</description>
+                    <attributeTypes>
+                        <attributeType name="DateTime" />
+                    </attributeTypes>
+                </property>
+                <property key="onClickEvent" type="action" required="false">
+                    <caption>On click action</caption>
+                    <description />
+                </property>
+                <property key="onClickEmpty" type="action" required="false">
+                    <caption>On click empty</caption>
+                    <description>Triggered when an empty time slot is selected</description>
+                </property>
+                <property key="onClickShowMore" type="action" required="false">
+                    <caption>On click of the +${count} text </caption>
+                    <description>Triggered when the show more text is clicked</description>
+                </property>
+            </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="Dimensions">
-            <property key="widthUnit" type="enumeration" defaultValue="percentage">
-                <caption>Width unit</caption>
-                <description />
-                <enumerationValues>
-                    <enumerationValue key="pixels">Pixels</enumerationValue>
-                    <enumerationValue key="percentage">Percentage</enumerationValue>
-                </enumerationValues>
-            </property>
-            <property key="width" type="integer" defaultValue="100">
-                <caption>Width</caption>
-                <description />
-            </property>
-            <property key="heightUnit" type="enumeration" defaultValue="pixels">
-                <caption>Height unit</caption>
-                <description />
-                <enumerationValues>
-                    <enumerationValue key="percentageOfWidth">Auto</enumerationValue>
-                    <enumerationValue key="pixels">Pixels</enumerationValue>
-                    <enumerationValue key="percentageOfParent">Percentage</enumerationValue>
-                    <enumerationValue key="percentageOfView">Viewport</enumerationValue>
-                </enumerationValues>
-            </property>
-            <property key="height" type="integer" defaultValue="250">
-                <caption>Height</caption>
-                <description />
-            </property>
-            <property key="minHeightUnit" type="enumeration" defaultValue="pixels">
-                <caption>Minimum height unit</caption>
-                <description />
-                <enumerationValues>
-                    <enumerationValue key="none">None</enumerationValue>
-                    <enumerationValue key="pixels">Pixels</enumerationValue>
-                    <enumerationValue key="percentageOfParent">Percentage</enumerationValue>
-                    <enumerationValue key="percentageOfView">Viewport</enumerationValue>
-                </enumerationValues>
-            </property>
-            <property key="minHeight" type="integer" defaultValue="250">
-                <caption>Minimum height</caption>
-                <description />
-            </property>
-            <property key="maxHeightUnit" type="enumeration" defaultValue="none">
-                <caption>Maximum height unit</caption>
-                <description />
-                <enumerationValues>
-                    <enumerationValue key="none">None</enumerationValue>
-                    <enumerationValue key="pixels">Pixels</enumerationValue>
-                    <enumerationValue key="percentageOfParent">Percentage</enumerationValue>
-                    <enumerationValue key="percentageOfView">Viewport</enumerationValue>
-                </enumerationValues>
-            </property>
-            <property key="maxHeight" type="integer" defaultValue="250">
-                <caption>Maximum height</caption>
-                <description />
-            </property>
-            <property key="overflowY" type="enumeration" defaultValue="auto">
-                <caption>Vertical overflow</caption>
-                <description />
-                <enumerationValues>
-                    <enumerationValue key="auto">Auto</enumerationValue>
-                    <enumerationValue key="scroll">Scroll</enumerationValue>
-                    <enumerationValue key="hidden">Hidden</enumerationValue>
-                </enumerationValues>
-            </property>
+            <propertyGroup caption="Dimensions">
+                <property key="widthUnit" type="enumeration" defaultValue="percentage">
+                    <caption>Width unit</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="pixels">Pixels</enumerationValue>
+                        <enumerationValue key="percentage">Percentage</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="width" type="integer" defaultValue="100">
+                    <caption>Width</caption>
+                    <description />
+                </property>
+                <property key="heightUnit" type="enumeration" defaultValue="pixels">
+                    <caption>Height unit</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="percentageOfWidth">Auto</enumerationValue>
+                        <enumerationValue key="pixels">Pixels</enumerationValue>
+                        <enumerationValue key="percentageOfParent">Percentage</enumerationValue>
+                        <enumerationValue key="percentageOfView">Viewport</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="height" type="integer" defaultValue="250">
+                    <caption>Height</caption>
+                    <description />
+                </property>
+                <property key="minHeightUnit" type="enumeration" defaultValue="pixels">
+                    <caption>Minimum height unit</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="none">None</enumerationValue>
+                        <enumerationValue key="pixels">Pixels</enumerationValue>
+                        <enumerationValue key="percentageOfParent">Percentage</enumerationValue>
+                        <enumerationValue key="percentageOfView">Viewport</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="minHeight" type="integer" defaultValue="250">
+                    <caption>Minimum height</caption>
+                    <description />
+                </property>
+                <property key="maxHeightUnit" type="enumeration" defaultValue="none">
+                    <caption>Maximum height unit</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="none">None</enumerationValue>
+                        <enumerationValue key="pixels">Pixels</enumerationValue>
+                        <enumerationValue key="percentageOfParent">Percentage</enumerationValue>
+                        <enumerationValue key="percentageOfView">Viewport</enumerationValue>
+                    </enumerationValues>
+                </property>
+                <property key="maxHeight" type="integer" defaultValue="250">
+                    <caption>Maximum height</caption>
+                    <description />
+                </property>
+                <property key="overflowY" type="enumeration" defaultValue="auto">
+                    <caption>Vertical overflow</caption>
+                    <description />
+                    <enumerationValues>
+                        <enumerationValue key="auto">Auto</enumerationValue>
+                        <enumerationValue key="scroll">Scroll</enumerationValue>
+                        <enumerationValue key="hidden">Hidden</enumerationValue>
+                    </enumerationValues>
+                </property>
+            </propertyGroup>
         </propertyGroup>
     </properties>
 </widget>

@@ -8,9 +8,9 @@ import { ActionValue, DynamicValue, EditableValue, ListValue, ListAttributeValue
 
 export type DefaultViewEnum = "week" | "month";
 
-export type Text1Enum = "attribute" | "expression";
+export type HeaderEnum = "attribute" | "expression";
 
-export type Text2Enum = "attribute" | "expression";
+export type DescriptionEnum = "attribute" | "expression";
 
 export type WidthUnitEnum = "pixels" | "percentage";
 
@@ -33,21 +33,22 @@ export interface CalendarContainerProps {
     displayType?: EditableValue<string>;
     quarterStart?: DynamicValue<Date>;
     quarterEnd?: DynamicValue<Date>;
-    timeslotEvents?: ListValue;
-    timeslotStartAttribute?: ListAttributeValue<Date>;
     databaseDataSource?: ListValue;
     eventTypeAttribute?: ListAttributeValue<string>;
     allDayAttribute?: ListAttributeValue<boolean>;
     startAttribute?: ListAttributeValue<Date>;
     endAttribute?: ListAttributeValue<Date>;
-    text1: Text1Enum;
-    text1Attribute?: ListAttributeValue<string>;
-    text1Expression?: ListExpressionValue<string>;
-    text2: Text2Enum;
-    text2Attribute?: ListAttributeValue<string>;
-    text2Expression?: ListExpressionValue<string>;
+    header: HeaderEnum;
+    headerAttribute?: ListAttributeValue<string>;
+    headerExpression?: ListExpressionValue<string>;
+    description: DescriptionEnum;
+    descriptionAttribute?: ListAttributeValue<string>;
+    descriptionExpression?: ListExpressionValue<string>;
     eventBackgroundColor?: ListAttributeValue<string>;
     eventFontColor?: ListAttributeValue<string>;
+    flags?: ListValue;
+    flagDateAttribute?: ListAttributeValue<Date>;
+    flagNameAttribute?: ListAttributeValue<string>;
     datesSelected?: ListValue;
     selectedDateAttr?: ListAttributeValue<Date>;
     clickedDate?: EditableValue<Date>;
@@ -82,21 +83,22 @@ export interface CalendarPreviewProps {
     displayType: string;
     quarterStart: string;
     quarterEnd: string;
-    timeslotEvents: {} | { caption: string } | { type: string } | null;
-    timeslotStartAttribute: string;
     databaseDataSource: {} | { caption: string } | { type: string } | null;
     eventTypeAttribute: string;
     allDayAttribute: string;
     startAttribute: string;
     endAttribute: string;
-    text1: Text1Enum;
-    text1Attribute: string;
-    text1Expression: string;
-    text2: Text2Enum;
-    text2Attribute: string;
-    text2Expression: string;
+    header: HeaderEnum;
+    headerAttribute: string;
+    headerExpression: string;
+    description: DescriptionEnum;
+    descriptionAttribute: string;
+    descriptionExpression: string;
     eventBackgroundColor: string;
     eventFontColor: string;
+    flags: {} | { caption: string } | { type: string } | null;
+    flagDateAttribute: string;
+    flagNameAttribute: string;
     datesSelected: {} | { caption: string } | { type: string } | null;
     selectedDateAttr: string;
     clickedDate: string;
