@@ -4,7 +4,7 @@ import { ReactElement, createElement, useMemo, useEffect } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CalendarContainerProps } from "../typings/CalendarProps";
-import { constructWrapperStyle } from "./utils/utils";
+// import { constructWrapperStyle } from "./utils/utils";
 import { format, startOfWeek, startOfMonth, endOfMonth } from 'date-fns';  
 import * as dateFns from "date-fns";
 
@@ -188,7 +188,7 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
     const rawView = props.viewAttribute?.value ?? props.defaultView;
     const currentView = rawView === "quarter" ? "month" : rawView;
 
-    const wrapperStyle = constructWrapperStyle(props);
+    // const wrapperStyle = constructWrapperStyle(props);
 
     const items = props.databaseDataSource?.items ?? [];
 
@@ -462,7 +462,8 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
 
   
     return (
-        <div className={classnames(className)} style={wrapperStyle}>
+        // <div className={classnames(className)} style={wrapperStyle}>
+        <div className={classnames(className)}>
             <Calendar<CalEvent>
                 localizer={localizer}
                 events={events}
