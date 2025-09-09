@@ -4,7 +4,6 @@ import { ReactElement, createElement, useMemo, useEffect } from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CalendarContainerProps } from "../typings/CalendarProps";
-// import { constructWrapperStyle } from "./utils/utils";
 import { format, startOfWeek, startOfMonth, endOfMonth } from 'date-fns';  
 import * as dateFns from "date-fns";
 
@@ -122,7 +121,7 @@ function groupIconEventsByDay(events: CalEvent[], view: string): CalEvent[] {
 const localizer = dateFnsLocalizer({
     format: dateFns.format,
     parse: dateFns.parse,
-    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 1 }), // make week view start on monday instead of sunday 
+    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 0 }), // use "1" to make week view start on monday instead of sunday 
     getDay: dateFns.getDay,
     locales: {}
 });
@@ -141,45 +140,6 @@ interface CalEvent {
     type?: string;
 }
 
-// icons need to show on each day of a multiday event 
-function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
-    const expandedEvents: CalEvent[] = [];
-    
-    events.forEach(event => {
-        const startDate = new Date(event.start);
-        const endDate = new Date(event.end);
-
-        const isMultiDay = startDate.toDateString() !== endDate.toDateString();
-        const shouldChunk = event.display === "icons" && view === "month";
-
-        // chunk events that are more than 1 day when display is icons
-        if (isMultiDay && shouldChunk) {
-            let currentDate = new Date(startDate);
-
-            while (currentDate < endDate) {
-                const chunkStart = new Date(currentDate);
-                chunkStart.setHours(0, 0, 0, 0); // time doesn't matter since multi-day events are shown in all day section and this will not change the displayed time 
-
-                const chunkEnd = new Date(currentDate);
-                chunkEnd.setHours(23, 59, 59, 999); // time doesn't matter since multi-day events are shown in all day section and this will not change the displayed time 
-
-                expandedEvents.push({
-                    ...event,
-                    start: chunkStart,
-                    end: chunkEnd,
-                });
-
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
-        } else {
-            // if single-day events or if display is EventInfo then don't chunk  
-            expandedEvents.push(event);
-        }
-    });
-
-    return expandedEvents;
-}
-
 
 export default function MxCalendar(props: CalendarContainerProps): ReactElement {
     const { class: className } = props;
@@ -187,8 +147,6 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
     // currentView will be "month" if "quarter" is selected 
     const rawView = props.viewAttribute?.value ?? props.defaultView;
     const currentView = rawView === "quarter" ? "month" : rawView;
-
-    // const wrapperStyle = constructWrapperStyle(props);
 
     const items = props.databaseDataSource?.items ?? [];
 
@@ -218,6 +176,61 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
 
         return { description, start, end, fontColor, backgroundColor, allDay, display, header, type }; 
     });
+
+    const rawQuarterStart = props.quarterStart?.value ?? new Date();
+const rawQuarterEnd = props.quarterEnd?.value ?? new Date();
+
+const quarterStart = startOfMonth(rawQuarterStart);
+const quarterEnd = endOfMonth(rawQuarterEnd);
+
+const isInQuarter = (date: Date): boolean =>
+        date >= quarterStart && date <= quarterEnd;
+
+// icons need to show on each day of a multiday event 
+function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
+    const expandedEvents: CalEvent[] = [];
+    
+    events.forEach(event => {
+        const startDate = new Date(event.start);
+        const endDate = new Date(event.end);
+
+        const isMultiDay = startDate.toDateString() !== endDate.toDateString();
+        const shouldChunk = event.display === "icons" && view === "month";
+
+        // chunk events that are more than 1 day when display is icons
+        if (isMultiDay && shouldChunk) {
+            let currentDate = new Date(startDate);
+            currentDate.setHours(0, 0, 0, 0);
+            endDate.setHours(0, 0, 0, 0);
+
+            while (currentDate <= endDate) {
+                if (isInQuarter(currentDate)) {
+
+                    const chunkStart = new Date(currentDate);
+                    chunkStart.setHours(0, 0, 0, 0); 
+
+                    const chunkEnd = new Date(currentDate);
+                    chunkEnd.setHours(23, 59, 59, 999); 
+                    
+                    expandedEvents.push({
+                        ...event,
+                        start: chunkStart,
+                        end: chunkEnd,
+                    });
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+                
+            }
+        } else {
+            // if single-day events or if display is EventInfo then don't chunk  
+            if (isInQuarter(startDate)) {
+                expandedEvents.push(event);
+            }
+        }
+    });
+
+    return expandedEvents;
+}
 
     const expanded = expandMultiDayEvents(rawEvents, currentView);
     const events = groupIconEventsByDay(expanded, currentView);
@@ -283,6 +296,10 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
 
     // header for the week view 
     const CustomWeekHeader = ({ date }: { date: Date }) => {
+        if (!isInQuarter(date)) {
+            return null; // Hide header for days outside the quarter
+        }
+
         const dayLetter = format(date, 'EEEEE'); // first letter of the weekday, ie. "M"
         const dayNumber = format(date, 'd');     // day of the month, ie. "3"
 
@@ -368,15 +385,6 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         );
     };
 
-    const rawQuarterStart = props.quarterStart?.value ?? new Date();
-    const rawQuarterEnd = props.quarterEnd?.value ?? new Date();
-
-    const quarterStart = startOfMonth(rawQuarterStart);
-    const quarterEnd = endOfMonth(rawQuarterEnd);
-
-    const isInQuarter = (date: Date): boolean =>
-        date >= quarterStart && date <= quarterEnd;
-
     const QuarterDateCellWrapper = (props: any) => {
         const { children, value } = props;
         // const inQuarter = isInQuarter(value);
@@ -411,14 +419,14 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
         }
     };
 
-    const handleSelectEvent = (event: CalEvent) => {
-        if (!isInQuarter(event.start)) {
+    const handleSelectEvent = (slotInfo: { start: Date; end: Date }) => {
+        if (!isInQuarter(slotInfo.start)) {
             return; // Ignore events outside quarter
         }
 
         // Set clicked date attribute in Mendix
         if (props.clickedDate && props.clickedDate.setValue) {
-            props.clickedDate.setValue(event.start); 
+            props.clickedDate.setValue(slotInfo.start); 
         }
 
         // Execute the onClickEvent action
