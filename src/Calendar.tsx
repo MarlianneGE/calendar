@@ -29,12 +29,29 @@ interface CustomMonthEventProps {
 
 }
 
+const colorTypeMap: Record<string, string> = {
+  "#13550C": "Overnight",
+  "#035EE1": "Activity",
+  "#B3177B": "Competition",
+  "#671EEB": "Transit",
+  "#A85100": "Timeslot",
+};
+
+
 // Event content is customized based on icons or eventInfo display  
 const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const isPast = event.end < today;
     const dimClass = isPast ? "rbc-day-dimmed" : "";
+
+    let eventDate;
+    if (format(event.start, "MM-dd") == format(event.end, "MM-dd")) {
+        eventDate = `date-${format(event.start, "MM-dd")}`; 
+    } else {
+        eventDate = `date-${format(event.start, "MM-dd")}-to-${format(event.end, "MM-dd")}`; 
+    }
+
     if (event.display === "icons" && event.icons && event.icons.length > 0) {
         const maxToShow = 3;
         const visible = event.icons.slice(0, maxToShow);
@@ -46,7 +63,7 @@ const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => 
                     {visible.map((color, i) => (
                         <span
                             key={i}
-                            className="color-circle"
+                            className={`color-circle ${eventDate} type-${colorTypeMap[color] || "unknown"}`}
                             style={{ backgroundColor: color }}
                             title={color}
                         />
@@ -73,7 +90,7 @@ const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => 
 
     if (event.display === "eventinfo") {
         return (
-            <div className={`event-info ${dimClass}`}>
+            <div className={`event-info ${dimClass} ${eventDate} type-${event.type}`}>
                 <p>{event.header}</p>
                 <strong>{event.description}</strong>
             </div>
