@@ -63,7 +63,7 @@ const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => 
                     {visible.map((color, i) => (
                         <span
                             key={i}
-                            className={`color-circle ${eventDate} type-${colorTypeMap[color] || "unknown"}`}
+                            className={`color-circle a_${eventDate} a_type-${colorTypeMap[color] || "unknown"}`}
                             style={{ backgroundColor: color }}
                             title={color}
                         />
@@ -90,7 +90,7 @@ const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => 
 
     if (event.display === "eventinfo") {
         return (
-            <div className={`event-info ${dimClass} ${eventDate} type-${event.type}`}>
+            <div className={`event-info ${dimClass} a_${eventDate} a_type-${event.type}`}>
                 <p>{event.header}</p>
                 <strong>{event.description}</strong>
             </div>
