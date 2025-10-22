@@ -341,7 +341,7 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
             .join(" ");
 
         return (
-            <div className={className}>
+            <div tabIndex={0} className={className}>
                 {isToday ? (
                     <span className="week-today-inner">
                         <div className="custom-week-header-letter">{dayLetter}</div>
@@ -392,7 +392,7 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
             .join(" ");
 
         return (
-            <div className={className}>
+            <div tabIndex={0} className={className}>
                 {isToday ? (
                     <span className="month-today-inner">{label}</span>
                 ) : (
@@ -402,15 +402,8 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
         );
     };
 
-    const QuarterDateCellWrapper = (props: any) => {
+    const DateCellWrapper = (props: any) => {
         const { children, value } = props;
-        // const inQuarter = isInQuarter(value);
-
-        // return (
-        //     <div className={inQuarter ? "in-quarter" : "out-of-quarter"}>
-        //         {children}
-        //     </div>
-        // );
 
         if (!isInQuarter(value)) {
             return <div style={{ visibility: "hidden", height: "100%" }}>{children}</div>;
@@ -516,7 +509,7 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
                         />
                         )
                     },
-                    dateCellWrapper: QuarterDateCellWrapper, 
+                    dateCellWrapper: DateCellWrapper, 
                 }}
                 formats={formats}
                 toolbar={false}
@@ -543,6 +536,7 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
                 drilldownView={null}
                 dayLayoutAlgorithm="no-overlap"
                 scrollToTime={new Date(1970, 1, 1, 6, 0, 0)} // Scroll to 6am, the date does not matter here, just need a date with the time that you want 
+                // longPressThreshold={120} // default is 250ms
             />
         </div>
     );
