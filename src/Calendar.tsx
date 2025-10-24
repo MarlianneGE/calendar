@@ -164,7 +164,7 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
     // currentView will be "month" if "quarter" is selected 
     const rawView = props.viewAttribute?.value ?? props.defaultView;
     const currentView = rawView === "quarter" ? "month" : rawView;
-
+    const isDatePicker = props.isDatePicker;
     const items = props.databaseDataSource?.items ?? [];
 
     const rawEvents: CalEvent[] = items.map(item => {
@@ -358,7 +358,7 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
     };
 
     // for the month view only 
-    const CustomMonthDateHeader = ({ label, date }: { label: string, date: Date }) => {
+    const CustomMonthDateHeader = ({ label, date, isDatePicker }: { label: string, date: Date, isDatePicker?: string; }) => {
 
         if (!isInQuarter(date)) {
             return null; // Hide header for days outside the quarter
@@ -391,8 +391,20 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
             .filter(Boolean)
             .join(" ");
 
+        // const shouldHaveTabIndex = !isDatePicker || (isDatePicker && !isPast);
+        let tabIndex: number | -1;
+        if (isDatePicker === 'False') {
+            tabIndex = 0;
+        } else if (!isPast || isToday) {
+            tabIndex = 0;
+        } else {
+            tabIndex = -1;
+        }
+
         return (
-            <div tabIndex={0} className={className}>
+            <div className={className}
+            tabIndex={tabIndex}
+            >
                 {isToday ? (
                     <span className="month-today-inner">{label}</span>
                 ) : (
@@ -499,6 +511,7 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
                         <CustomMonthDateHeader
                             label={label}
                             date={date}
+                            isDatePicker={isDatePicker}
                         />
                     ),
                     month: {

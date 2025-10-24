@@ -12,6 +12,8 @@ export type HeaderEnum = "attribute" | "expression";
 
 export type DescriptionEnum = "attribute" | "expression";
 
+export type IsDatePickerEnum = "False" | "True";
+
 export interface CalendarContainerProps {
     name: string;
     class: string;
@@ -41,6 +43,7 @@ export interface CalendarContainerProps {
     flagNameAttribute?: ListAttributeValue<string>;
     datesSelected?: ListValue;
     selectedDateAttr?: ListAttributeValue<Date>;
+    isDatePicker: IsDatePickerEnum;
     clickedDate?: EditableValue<Date>;
     onClickEvent?: ActionValue;
     onClickEmpty?: ActionValue;
@@ -82,6 +85,7 @@ export interface CalendarPreviewProps {
     flagNameAttribute: string;
     datesSelected: {} | { caption: string } | { type: string } | null;
     selectedDateAttr: string;
+    isDatePicker: IsDatePickerEnum;
     clickedDate: string;
     onClickEvent: {} | null;
     onClickEmpty: {} | null;

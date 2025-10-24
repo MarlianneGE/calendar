@@ -178,6 +178,14 @@
                         <attributeType name="DateTime" />
                     </attributeTypes>
                 </property>
+                <property key="isDatePicker" type="enumeration" defaultValue="False">
+                    <caption>Date picker?</caption>
+                    <description>Is the calendar being used as a date picker or a calendar?</description>
+                    <enumerationValues>
+                        <enumerationValue key="False">false, used as calendar</enumerationValue>
+                        <enumerationValue key="True">true, used as a date picker</enumerationValue>
+                    </enumerationValues>
+                </property>
             </propertyGroup>
         </propertyGroup>
         <propertyGroup caption="On Click">
