@@ -3,10 +3,11 @@
  * WARNING: All changes made to this file will be overwritten
  * @author Mendix Widgets Framework Team
  */
-import { CSSProperties } from "react";
-import { ActionValue, DynamicValue, EditableValue, ListValue, ListAttributeValue, ListExpressionValue } from "mendix";
+import { ComponentType, CSSProperties, ReactNode } from "react";
+import { ActionValue, DynamicValue, EditableValue, ListValue, ListAttributeValue, ListExpressionValue, ListWidgetValue } from "mendix";
+import { Big } from "big.js";
 
-export type DefaultViewEnum = "week" | "month";
+export type DefaultViewEnum = "week" | "month" | "agenda";
 
 export type HeaderEnum = "attribute" | "expression";
 
@@ -23,13 +24,16 @@ export interface CalendarContainerProps {
     viewAttribute?: EditableValue<string>;
     defaultView: DefaultViewEnum;
     displayType?: EditableValue<string>;
-    quarterStart?: DynamicValue<Date>;
-    quarterEnd?: DynamicValue<Date>;
+    quarterStart?: EditableValue<Big>;
+    quarterEnd?: EditableValue<Big>;
+    userTimeZone: EditableValue<string>;
+    localeAttribute?: EditableValue<string>;
+    weekStartInt?: EditableValue<Big>;
     databaseDataSource?: ListValue;
     eventTypeAttribute?: ListAttributeValue<string>;
     allDayAttribute?: ListAttributeValue<boolean>;
-    startAttribute?: ListAttributeValue<Date>;
-    endAttribute?: ListAttributeValue<Date>;
+    startAttribute?: ListAttributeValue<Big>;
+    endAttribute?: ListAttributeValue<Big>;
     header: HeaderEnum;
     headerAttribute?: ListAttributeValue<string>;
     headerExpression?: ListExpressionValue<string>;
@@ -38,6 +42,7 @@ export interface CalendarContainerProps {
     descriptionExpression?: ListExpressionValue<string>;
     eventBackgroundColor?: ListAttributeValue<string>;
     eventFontColor?: ListAttributeValue<string>;
+    agendaEventTemplate?: ListWidgetValue;
     flags?: ListValue;
     flagDateAttribute?: ListAttributeValue<Date>;
     flagNameAttribute?: ListAttributeValue<string>;
@@ -45,9 +50,7 @@ export interface CalendarContainerProps {
     selectedDateAttr?: ListAttributeValue<Date>;
     isDatePicker: IsDatePickerEnum;
     clickedDate?: EditableValue<Date>;
-    onClickEvent?: ActionValue;
     onClickEmpty?: ActionValue;
-    onClickShowMore?: ActionValue;
 }
 
 export interface CalendarPreviewProps {
@@ -67,6 +70,9 @@ export interface CalendarPreviewProps {
     displayType: string;
     quarterStart: string;
     quarterEnd: string;
+    userTimeZone: string;
+    localeAttribute: string;
+    weekStartInt: string;
     databaseDataSource: {} | { caption: string } | { type: string } | null;
     eventTypeAttribute: string;
     allDayAttribute: string;
@@ -80,6 +86,7 @@ export interface CalendarPreviewProps {
     descriptionExpression: string;
     eventBackgroundColor: string;
     eventFontColor: string;
+    agendaEventTemplate: { widgetCount: number; renderer: ComponentType<{ children: ReactNode; caption?: string }> };
     flags: {} | { caption: string } | { type: string } | null;
     flagDateAttribute: string;
     flagNameAttribute: string;
@@ -87,7 +94,5 @@ export interface CalendarPreviewProps {
     selectedDateAttr: string;
     isDatePicker: IsDatePickerEnum;
     clickedDate: string;
-    onClickEvent: {} | null;
     onClickEmpty: {} | null;
-    onClickShowMore: {} | null;
 }

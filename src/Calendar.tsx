@@ -1,12 +1,27 @@
 // main entry point for the widget; all props will come in from here.
 import classnames from "classnames";
-import { ReactElement, createElement, useMemo, useEffect } from "react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import { ReactElement, createElement, useMemo, useEffect, useState } from "react"; 
+import { Calendar, luxonLocalizer } from "react-big-calendar";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import { CalendarContainerProps } from "../typings/CalendarProps";
-import { format, startOfWeek, startOfMonth, endOfMonth } from 'date-fns';  
-import * as dateFns from "date-fns";
+import { DateTime, Settings } from 'luxon'
 
+const defaultTZ = DateTime.local().zoneName
+const defaultDateStr = '2015-04-13'
+
+function getDate(str: string, DateTimeObj: typeof DateTime): Date {
+  // If 'str' is corrupt (e.g., '2015-99-13'), or if Luxon fails to parse it
+  // due to the current zone settings, 'fromISO' might return an invalid date.
+  const luxonDate = DateTimeObj.fromISO(str);
+
+  if (!luxonDate.isValid) {
+    console.error("Luxon failed to parse date string:", str, "in timezone:", Settings.defaultZone);
+    // Return a valid date as a fallback 
+    return new Date(); 
+  }
+
+  return luxonDate.toJSDate();
+}
 
 const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
      const { header, allDay, description } = event;
@@ -24,48 +39,45 @@ const CustomWeekEvent = ({ event }: { event: CalEvent }) => {
 };
 
 interface CustomMonthEventProps {
-    event: CalEvent & { icons?: string[] };
+    event: CalEvent;
     onShowMoreClick?: (date: Date) => void;
-
+    stableZone: string;
 }
 
-const colorTypeMap: Record<string, string> = {
-  "#13550C": "Overnight",
-  "#035EE1": "Activity",
-  "#B3177B": "Competition",
-  "#671EEB": "Transit",
-  "#A85100": "Timeslot",
-};
-
-
 // Event content is customized based on icons or eventInfo display  
-const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const isPast = event.end < today;
+const CustomMonthEvent = ({ event, onShowMoreClick, stableZone }: CustomMonthEventProps) => {
+const today = DateTime.now().setZone(stableZone).startOf('day');
+    const eventEnd = DateTime.fromJSDate(event.end, { zone: stableZone });
+    const isPast = eventEnd < today;
     const dimClass = isPast ? "rbc-day-dimmed" : "";
 
     let eventDate;
-    if (format(event.start, "MM-dd") == format(event.end, "MM-dd")) {
-        eventDate = `date-${format(event.start, "MM-dd")}`; 
+    const startStr = DateTime.fromJSDate(event.start, { zone: stableZone }).toFormat("MM-dd");
+    const endStr = DateTime.fromJSDate(event.end, { zone: stableZone }).toFormat("MM-dd");
+    if (startStr === endStr) {
+        eventDate = `date-${startStr}`; 
     } else {
-        eventDate = `date-${format(event.start, "MM-dd")}-to-${format(event.end, "MM-dd")}`; 
+        eventDate = `date-${startStr}-to-${endStr}`; 
     }
 
     if (event.display === "icons" && event.icons && event.icons.length > 0) {
         const maxToShow = 3;
-        const visible = event.icons.slice(0, maxToShow);
+
+        const visibleIconData = event.icons
+            .filter(item => Array.isArray(item) && item.length === 2) as IconDataTuple[];
+
+        const visible = visibleIconData.slice(0, maxToShow);
         const hiddenCount = event.icons.length - visible.length;
 
         return (
             <div className={`icon-row ${dimClass}`}>
                 <div className="circle-row">
-                    {visible.map((color, i) => (
+                    {visibleIconData.map(([eventType, eventColor], i) => (
                         <span
                             key={i}
-                            className={`color-circle a_${eventDate} a_type-${colorTypeMap[color] || "unknown"}`}
-                            style={{ backgroundColor: color }}
-                            title={color}
+                            className={`color-circle a_${eventDate} a_type-${eventType}`} 
+                            style={{ backgroundColor: eventColor }} 
+                            title={eventType}
                         />
                     ))}
                 </div>
@@ -102,7 +114,7 @@ const CustomMonthEvent = ({ event, onShowMoreClick }: CustomMonthEventProps) => 
 
 
 
-function groupIconEventsByDay(events: CalEvent[], view: string): CalEvent[] {
+function groupIconEventsByDay(events: CalEvent[], view: string ): CalEvent[] {
     if (view !== "month") return events;
 
     const groupedMap = new Map<string, CalEvent>();
@@ -116,18 +128,25 @@ function groupIconEventsByDay(events: CalEvent[], view: string): CalEvent[] {
         }
 
         if (event.display === "icons") {
-            const dayKey = event.start.toDateString();
+            // The event.start date is already in the correct timezone context.
+            // We just need to format it to get a consistent key for grouping.
+            const dayKey = DateTime.fromJSDate(event.start).toISODate() || '';
+
+            const eventType = event.type || "unknown";
+            const eventColor = event.fontColor || "#999";
+            const iconData: [string, string] = [eventType, eventColor]; // [Type, Color]
+
 
             if (!groupedMap.has(dayKey)) {
                 groupedMap.set(dayKey, {
                     ...event,
                     display: "icons",
                     description: "",            // suppress description
-                    icons: [event.fontColor || "#999"], // custom field for grouped icons
+                    icons: [iconData],
                 });
             } else {
                 const grouped = groupedMap.get(dayKey)!;
-                (grouped.icons ||= []).push(event.fontColor || "#999");
+                (grouped.icons ||= []).push(iconData);
             }
         }
     }
@@ -135,13 +154,7 @@ function groupIconEventsByDay(events: CalEvent[], view: string): CalEvent[] {
     return [...result, ...groupedMap.values()];
 }
 
-const localizer = dateFnsLocalizer({
-    format: dateFns.format,
-    parse: dateFns.parse,
-    startOfWeek: () => startOfWeek(new Date(), { weekStartsOn: 0 }), // use "1" to make week view start on monday instead of sunday 
-    getDay: dateFns.getDay,
-    locales: {}
-});
+type IconDataTuple = [string, string];
 
 interface CalEvent {
     description: string;
@@ -150,22 +163,74 @@ interface CalEvent {
     allDay: boolean;
     display: string;
     // optional: 
-    icons?: string[];
+    icons?: Array<string | IconDataTuple>;
     fontColor?: string;
     backgroundColor?: string;
     header?: string;
     type?: string;
+    item?: any;
 }
-
 
 export default function MxCalendar(props: CalendarContainerProps): ReactElement {
     const { class: className } = props;
 
     // currentView will be "month" if "quarter" is selected 
     const rawView = props.viewAttribute?.value ?? props.defaultView;
-    const currentView = rawView === "quarter" ? "month" : rawView;
+
+    // When 'day' is selected, use the 'agenda' view to create a list view for that single day.
+    // When 'quarter' is selected, use the 'month' view to show the quarter's months. 
+    const currentView = rawView === "quarter" ? "month" 
+        : rawView === "day" ? "agenda" : rawView;
+
     const isDatePicker = props.isDatePicker;
     const items = props.databaseDataSource?.items ?? [];
+
+    const timezoneFromProp = props.userTimeZone.value?? defaultTZ;
+    const selectedTimezone: string = 
+        (timezoneFromProp && timezoneFromProp.trim() !== '') ? timezoneFromProp : defaultTZ;
+
+    const rawLocale = props.localeAttribute?.value;
+    // Mendix often uses underscores (en_US), but Luxon/Intl requires hyphens (en-US)
+    const locale = rawLocale ? rawLocale.replace(/_/g, "-").trim() : undefined;
+    const rawWeekStart = (props as any).weekStartInt?.value;
+    const weekStartInt = rawWeekStart !== undefined && rawWeekStart !== null ? Number(rawWeekStart) : undefined;
+
+    // Prevent calendar from flickering during timezone change 
+    const [stableZone, setStableZone] = useState(selectedTimezone);
+    const [isProcessing, setIsProcessing] = useState(false);
+
+    useEffect(() => {
+        if (Settings.defaultZone.name !== selectedTimezone) {
+            // Signal that we are starting a timezone change operation
+            setIsProcessing(true); 
+            // Apply the timezone change
+            Settings.defaultZone = selectedTimezone; 
+
+            const timer = setTimeout(() => {
+                setStableZone(selectedTimezone);
+                setIsProcessing(false);
+            }, 0); 
+            return () => clearTimeout(timer);
+        }
+    }, [selectedTimezone]);
+    
+    useEffect(() => {
+        const originalLocale = Settings.defaultLocale;
+        return () => {
+            Settings.defaultZone = defaultTZ; // reset to browser TZ on unmount
+            Settings.defaultLocale = originalLocale; // reset locale on unmount
+        }
+    }, [])
+
+    useEffect(() => {
+        if (locale) {
+            try {
+                Settings.defaultLocale = locale;
+            } catch (e) {
+                console.warn("Invalid locale:", locale, e);
+            }
+        }
+    }, [locale]);
 
     const rawEvents: CalEvent[] = items.map(item => {
         const header =
@@ -182,52 +247,80 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
                   ? (props.descriptionExpression.get(item).value ?? "")
                   : "";
 
-        const start = props.startAttribute?.get(item).value ?? new Date();
-        const end = props.endAttribute?.get(item).value ?? start;
+        const rawStart = props.startAttribute?.get(item).value; // epoch
+        const rawEnd = props.endAttribute?.get(item).value; // epoch 
+        // Convert Epoch to JS Date via Luxon using the selected timezone
+        const start = rawStart 
+            ? DateTime.fromMillis(Number(rawStart), { zone: stableZone }).toJSDate() 
+            : new Date();
+        const end = rawEnd 
+            ? DateTime.fromMillis(Number(rawEnd), { zone: stableZone }).toJSDate() 
+            : start;
+
         const allDay = props.allDayAttribute?.get(item).value ?? false;
         const fontColor = props.eventFontColor?.get(item).value;
         const backgroundColor = props.eventBackgroundColor?.get(item).value;
         const rawdisplay = props.displayType?.value;
         const display = rawdisplay ? rawdisplay.toString().toLowerCase() : "";
-        const type = props.eventTypeAttribute?.get(item)?.value ?? "";
+        const type = props.eventTypeAttribute?.get(item)?.value ?? ""; 
 
-        return { description, start, end, fontColor, backgroundColor, allDay, display, header, type }; 
+        return { description, start, end, fontColor, backgroundColor, allDay, display, header, type, item }; 
     });
 
-    const rawQuarterStart = props.quarterStart?.value ?? new Date();
-const rawQuarterEnd = props.quarterEnd?.value ?? new Date();
+    const rawQuarterStart = props.quarterStart?.value ? Number(props.quarterStart.value) : undefined; // epoch
+    const rawQuarterEnd = props.quarterEnd?.value ? Number(props.quarterEnd.value) : undefined; // epoch
 
-const quarterStart = startOfMonth(rawQuarterStart);
-const quarterEnd = endOfMonth(rawQuarterEnd);
+    // Luxon DateTime objects for quarter boundaries 
+    // Don't adjust time by timezone: ie. if end of quarter is Dec 31, keep end of quarter as Dec 31 regardless of timezone 
+    const quarterStartLuxon = rawQuarterStart
+        ? DateTime.fromMillis(Number(rawQuarterStart), { zone: "UTC" }).setZone(stableZone, { keepLocalTime: true })
+        : DateTime.now().setZone(stableZone).startOf("day"); // fallback
 
-const isInQuarter = (date: Date): boolean =>
-        date >= quarterStart && date <= quarterEnd;
+    const quarterEndLuxon = (rawQuarterEnd
+        ? DateTime.fromMillis(Number(rawQuarterEnd), { zone: "UTC" }).setZone(stableZone, { keepLocalTime: true })
+        : quarterStartLuxon.endOf("month") // fallback
+    ).endOf("day");
 
-// icons need to show on each day of a multiday event 
-function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
+    const isInQuarter = (date: Date): boolean => {
+        const d = DateTime.fromJSDate(date, { zone: stableZone });
+        return d >= quarterStartLuxon && d <= quarterEndLuxon;
+    };
+
+// Events processing: expand multi-day events and filter/adjust based on quarter boundaries
+function expandMultiDayEvents(
+    events: CalEvent[],
+    view: string,
+    stableZone: string,
+    quarterStartLuxon: DateTime,
+    quarterEndLuxon: DateTime
+): CalEvent[] {
     const expandedEvents: CalEvent[] = [];
     
     events.forEach(event => {
-        const startDate = new Date(event.start);
-        const endDate = new Date(event.end);
+        let luxonStart = DateTime.fromJSDate(event.start, { zone: stableZone });
+        let luxonEnd = DateTime.fromJSDate(event.end, { zone: stableZone });
 
-        const isMultiDay = startDate.toDateString() !== endDate.toDateString();
+        // Check if the event actually overlaps with the quarter
+        const overlapsQuarter = luxonStart <= quarterEndLuxon && luxonEnd >= quarterStartLuxon;
+
+        // true if any part of the event's date range falls within the quarter's date range
+        if (!overlapsQuarter) {
+            return; // Event is not in the quarter, so skip it
+        }
+
+        const isMultiDay = luxonStart.toISODate() !== luxonEnd.toISODate();
         const shouldChunk = event.display === "icons" && view === "month";
 
         // chunk events that are more than 1 day when display is icons
         if (isMultiDay && shouldChunk) {
-            let currentDate = new Date(startDate);
-            currentDate.setHours(0, 0, 0, 0);
-            endDate.setHours(0, 0, 0, 0);
+            let currentDayIter = luxonStart.startOf('day');
+            const endDayIter = luxonEnd.startOf('day');
 
-            while (currentDate <= endDate) {
-                if (isInQuarter(currentDate)) {
-
-                    const chunkStart = new Date(currentDate);
-                    chunkStart.setHours(0, 0, 0, 0); 
-
-                    const chunkEnd = new Date(currentDate);
-                    chunkEnd.setHours(23, 59, 59, 999); 
+            while (currentDayIter <= endDayIter) {
+                // Only chunk if the current day is within the quarter
+                if (currentDayIter.endOf('day') >= quarterStartLuxon && currentDayIter <= quarterEndLuxon) {
+                    const chunkStart = currentDayIter.toJSDate();
+                    const chunkEnd = currentDayIter.endOf('day').toJSDate();
                     
                     expandedEvents.push({
                         ...event,
@@ -235,66 +328,63 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
                         end: chunkEnd,
                     });
                 }
-                currentDate.setDate(currentDate.getDate() + 1);
+                currentDayIter = currentDayIter.plus({ days: 1 });
                 
             }
-        } else {
-            // if single-day events or if display is EventInfo then don't chunk  
-            if (isInQuarter(startDate)) {
-                expandedEvents.push(event);
+        } else { // For single-day events or eventinfo display, adjust start/end to fit within the quarter
+            let adjustedStart = luxonStart;
+            let adjustedEnd = luxonEnd;
+
+            // Adjust start date if it's before the quarter start
+            if (adjustedStart < quarterStartLuxon) {
+                adjustedStart = quarterStartLuxon;
             }
+            // Adjust end date if it's after the quarter end
+            if (adjustedEnd > quarterEndLuxon) {
+                adjustedEnd = quarterEndLuxon;
+            }
+
+            expandedEvents.push({
+                ...event,
+                start: adjustedStart.toJSDate(),
+                end: adjustedEnd.toJSDate(),
+            });
         }
     });
-
     return expandedEvents;
-}
+}    
 
-    const expanded = expandMultiDayEvents(rawEvents, currentView);
-    const events = groupIconEventsByDay(expanded, currentView);
-
-    const viewsOption = ["month", "week", "quarter"] as const;
+    const viewsOption = ["month", "week", "quarter","day", "agenda"] as const;
 
     const eventPropGetter = (event: CalEvent) => {
-        const shouldApplyBackground = currentView === "week" || (currentView === "month" && event.display === "eventinfo");
+        const shouldApplyColor = 
+            currentView === "week" || 
+            (currentView === "month" && event.display === "eventinfo");
 
         return {
             style: {
-                backgroundColor: shouldApplyBackground ? event.backgroundColor : "transparent",
-                color: event.fontColor
+                backgroundColor: shouldApplyColor ? event.backgroundColor : "transparent",
+                color: shouldApplyColor ? event.fontColor : "black"
             }
         };
     };
 
     // formats 
     const formats = useMemo(() => ({
-
         // month view; 1 letter to represent day of the week in column headers 
-        weekdayFormat: (
-            date: Date,
-            culture: string | undefined,
-            localizer: ReturnType<typeof dateFnsLocalizer>
-        ) => localizer.format(date, "EEEEE", culture),
+        weekdayFormat: (date: Date) => DateTime.fromJSDate(date, { zone: stableZone }).toFormat("EEEEE"),
 
         // format for the number representing the day of the month for each cell in month view 
-        dateFormat: (
-            date: Date,
-            culture: string | undefined,
-            localizer: ReturnType<typeof dateFnsLocalizer>
-        ) => localizer.format(date, 'd', culture),
+        dateFormat: (date: Date) => DateTime.fromJSDate(date, { zone: stableZone }).toFormat('d'),
 
-        timeGutterFormat: (
-            date: Date,
-            culture: string | undefined,
-            localizer: ReturnType<typeof dateFnsLocalizer>
-        ) => localizer.format(date, "HH:mm", culture), // 24-hour format, no AM/PM 
- 
-    }), []);
+        timeGutterFormat: (date: Date) => DateTime.fromJSDate(date, { zone: stableZone }).toFormat("HH:mm"), 
+    }), [stableZone, locale]);
 
     // get the selected dates list 
     const selectedDates = (props.datesSelected?.items ?? [])
         .map(item => {
             const value = props.selectedDateAttr?.get(item)?.value;
-            return value ? new Date(value.setHours(0, 0, 0, 0)) : null;
+            return value ? DateTime.fromJSDate(value, { zone: stableZone }).startOf('day').toJSDate() : null;
         })
         .filter((date): date is Date => !!date);
 
@@ -306,81 +396,74 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
         const date = props.flagDateAttribute?.get(item)?.value;
         const name = props.flagNameAttribute?.get(item)?.value;
         if (date && name) {
-            const dayKey = date.toDateString();
-            flagMap.set(dayKey, name ?? "default-flag");
+           const dayKey = DateTime.fromJSDate(date, { zone: stableZone }).toISODate()!;
+           flagMap.set(dayKey, name ?? "default-flag");
         }
     }
 
     // header for the week view 
     const CustomWeekHeader = ({ date }: { date: Date }) => {
-        if (!isInQuarter(date)) {
+
+        const cellDate = DateTime.fromJSDate(date, { zone: stableZone }).startOf('day');
+
+        // Convert back to JS Date for compatibility with date-fns and isInQuarter
+        const cellJsDate = cellDate.toJSDate();
+
+        if (!isInQuarter(cellJsDate)) {
             return null; // Hide header for days outside the quarter
         }
+        const dayLetter = cellDate.toFormat('EEEEE'); 
+        const dayNumber = cellDate.toFormat('d'); 
 
-        const dayLetter = format(date, 'EEEEE'); // first letter of the weekday, ie. "M"
-        const dayNumber = format(date, 'd');     // day of the month, ie. "3"
+        // Get the current time, interpret it in the selected zone, and set to start of day
+        const today = DateTime.now().setZone(stableZone).startOf('day');
 
-        // Normalize input date
-        const normalizedDate = new Date(date);
-        normalizedDate.setHours(0, 0, 0, 0);
+        const isToday = cellDate.toMillis() === today.toMillis();
 
-        // Normalize today's date
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const isToday = normalizedDate.getTime() === today.getTime();
-
-        const dayKey = normalizedDate.toDateString();
+        const dayKey = cellJsDate.toDateString();
         const flagClass = flagMap.get(dayKey);
 
         const className = [
             "custom-week-header",
-            flagClass
+            flagClass,
+            isToday ? "rbc-today" : ""
         ]
             .filter(Boolean)
             .join(" ");
 
         return (
             <div tabIndex={0} className={className}>
-                {isToday ? (
-                    <span className="week-today-inner">
-                        <div className="custom-week-header-letter">{dayLetter}</div>
-                        <div className="custom-week-header-number">{dayNumber}</div>
-                    </span>
-                ) : (
-                    <span>
-                        <div className="custom-week-header-letter">{dayLetter}</div>
-                        <div className="custom-week-header-number">{dayNumber}</div>
-                    </span>
-                )}
+                <span>
+                    <div className="custom-week-header-letter">{dayLetter}</div>
+                    <div className="custom-week-header-number">{dayNumber}</div>
+                </span>
             </div>
         );
     };
 
     // for the month view only 
-    const CustomMonthDateHeader = ({ label, date, isDatePicker }: { label: string, date: Date, isDatePicker?: string; }) => {
+    const CustomMonthDateHeader = ({ label, date }: { label: string, date: Date }) => {
+
+        const cellDate = DateTime.fromJSDate(date, { zone: stableZone }).startOf('day');
+        const cellISO = cellDate.toISODate();
 
         if (!isInQuarter(date)) {
-            return null; // Hide header for days outside the quarter
+            return null; // Ensure isInQuarter can handle JS Date or update it to handle Luxon
         }
 
-        // Normalize input date
-        const normalizedDate = new Date(date);
-        normalizedDate.setHours(0, 0, 0, 0);
+        // The current time, interpreted in the selected zone, then set to start of day
+        const today = DateTime.now().setZone(stableZone).startOf('day');
+        const todayISO = today.toISODate();
+        
+        const isToday = cellISO === todayISO;
+        const isPast = cellDate < today; 
+        
+        // Comparison for Selected dates (need to ensure selectedDates are also normalized)
+        const isSelected = selectedDates.some(d => {
+            return DateTime.fromJSDate(d, { zone: stableZone }).toISODate() === cellISO;
+        });
 
-        // Normalize today's date
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        const isToday = normalizedDate.getTime() === today.getTime();
-
-        const isSelected = selectedDates.some(
-            selected => selected.getTime() === normalizedDate.getTime()
-        );
-        const isPast = normalizedDate < new Date(new Date().setHours(0,0,0,0));
-
-        const dayKey = normalizedDate.toDateString();
-        const flagClass = flagMap.get(dayKey);
+        const flagClass = flagMap.get(cellISO!);
 
         const className = [
             "rbc-date-cell",
@@ -391,7 +474,6 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
             .filter(Boolean)
             .join(" ");
 
-        // const shouldHaveTabIndex = !isDatePicker || (isDatePicker && !isPast);
         let tabIndex: number | -1;
         if (isDatePicker === 'False') {
             tabIndex = 0;
@@ -402,9 +484,7 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
         }
 
         return (
-            <div className={className}
-            tabIndex={tabIndex}
-            >
+            <div className={className} tabIndex={tabIndex}>
                 {isToday ? (
                     <span className="month-today-inner">{label}</span>
                 ) : (
@@ -415,9 +495,9 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
     };
 
     const DateCellWrapper = (props: any) => {
-        const { children, value } = props;
+        const { children, value } = props; 
 
-        if (!isInQuarter(value)) {
+        if (value && !isInQuarter(value)) {
             return <div style={{ visibility: "hidden", height: "100%" }}>{children}</div>;
         }
 
@@ -426,34 +506,21 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
 
 
     const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
-        if (!isInQuarter(slotInfo.start)) {
-            return; // Ignore clicks outside quarter
-        }
+        const zonedStart = DateTime.fromJSDate(slotInfo.start, { zone: stableZone });
+        // Ignore clicks outside quarter
+        if (!isInQuarter(zonedStart.toJSDate())) return;
+
+        const cleanDate = zonedStart.startOf('day').toJSDate();
+        // const cleanDate = new Date(zonedStart.year, zonedStart.month - 1, zonedStart.day);
 
         // Set clicked date attribute in Mendix 
         if (props.clickedDate && props.clickedDate.setValue) {
-            props.clickedDate.setValue(slotInfo.start); 
+            props.clickedDate.setValue(cleanDate); 
         }
 
         // Execute the onClickEmpty action
         if (props.onClickEmpty && props.onClickEmpty.canExecute) {
             props.onClickEmpty.execute();
-        }
-    };
-
-    const handleSelectEvent = (slotInfo: { start: Date; end: Date }) => {
-        if (!isInQuarter(slotInfo.start)) {
-            return; // Ignore events outside quarter
-        }
-
-        // Set clicked date attribute in Mendix
-        if (props.clickedDate && props.clickedDate.setValue) {
-            props.clickedDate.setValue(slotInfo.start); 
-        }
-
-        // Execute the onClickEvent action
-        if (props.onClickEvent && props.onClickEvent.canExecute) {
-            props.onClickEvent.execute();
         }
     };
 
@@ -463,21 +530,9 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
     }), []);
 
     function onShowMore(_events: CalEvent[], date: Date): false {
-    if (props.clickedDate?.setValue) {
-        props.clickedDate.setValue(date);
+        handleSelectSlot({ start: date, end: date });
+        return false;
     }
-
-    if (props.onClickShowMore?.canExecute) {
-        props.onClickShowMore.execute();
-    }
-
-    if (props.viewAttribute?.setValue) {
-        props.viewAttribute.setValue("month");
-    }
-
-    return false;
-}
-
 
     useEffect(() => {
         const handler = (e: any) => {
@@ -490,69 +545,123 @@ function expandMultiDayEvents(events: CalEvent[], view: string): CalEvent[] {
         return () => window.removeEventListener("customShowMore", handler);
     }, []);
 
+    const { localizer, getNow, scrollToTime, defaultDate } =
+        useMemo(() => {
+            // Mendix: 0=Sun, 1=Mon
+            // Luxon: 7=Sun, 1=Mon
+            let luxonFirstDayOfWeek = 7;
+
+            if (weekStartInt !== undefined && weekStartInt !== null) {
+                const val = Number(weekStartInt);
+                if (!isNaN(val)) {
+                    luxonFirstDayOfWeek = val === 0 ? 7 : val;
+                }
+            }
+
+            const l = luxonLocalizer(DateTime, { firstDayOfWeek: luxonFirstDayOfWeek });
+            const originalStartOf = l.startOf;
+
+            l.startOf = (date: Date, unit: string, culture?: any) => {
+                if (unit === 'week') {
+                    const dtObj = DateTime.fromJSDate(date, { zone: stableZone });
+                    const weekday = dtObj.weekday;
+                    const diff = (weekday - luxonFirstDayOfWeek + 7) % 7;
+                    return dtObj.minus({ days: diff }).startOf('day').toJSDate();
+                }
+                return originalStartOf(date, unit, culture);
+            };
+
+            return {
+                defaultDate: getDate(defaultDateStr, DateTime),
+                getNow: () => DateTime.now().setZone(stableZone).toJSDate(),
+                localizer: l,
+                // Scroll to 6am, the date does not matter here, just need a date with the time that you want
+                scrollToTime: DateTime.now().setZone(stableZone).set({ hour: 6, minute: 0, second: 0, millisecond: 0 }).toJSDate()}
+        }, [stableZone, locale, weekStartInt])
+
+    // Events processing block that uses the timezone-synced data
+    const finalEvents = useMemo(() => {
+        // Guard against processing during the switch
+        if (isProcessing) return []; 
+        
+        const expanded = expandMultiDayEvents(rawEvents, currentView, stableZone, quarterStartLuxon, quarterEndLuxon);
+        return groupIconEventsByDay(expanded, currentView);
+    }, [rawEvents, currentView, stableZone, isProcessing]);
   
-    return (
-        // <div className={classnames(className)} style={wrapperStyle}>
-        <div className={classnames(className)}>
-            <Calendar<CalEvent>
-                localizer={localizer}
-                events={events}
-                startAccessor={(event: CalEvent) => event.start}
-                endAccessor={(event: CalEvent) => event.end}
-                views={viewsOption}
-                allDayAccessor={(event: CalEvent) => event.allDay}
-                eventPropGetter={eventPropGetter}
-                components={{
-                    week: {
-                        header: CustomWeekHeader,
-                        event: CustomWeekEvent
-                    },
-                    dateHeader: ({ label, date }: { label: string, date: Date }) => (
-                        <CustomMonthDateHeader
-                            label={label}
-                            date={date}
-                            isDatePicker={isDatePicker}
-                        />
-                    ),
-                    month: {
-                        event: (calendarEventProps: { event: CalEvent }) => (
-                        <CustomMonthEvent
-                            {...calendarEventProps}
-                            onShowMoreClick={(date) => onShowMore([], date)}     
-                        />
-                        )
-                    },
-                    dateCellWrapper: DateCellWrapper, 
-                }}
-                formats={formats}
-                toolbar={false}
-                view={currentView ?? props.defaultView}
-                date={props.dateExpression?.value ?? new Date()}
-                onView={(newView: "month" | "week" | "quarter") => {
-                    props.viewAttribute?.setValue?.(newView);
-                }}
-                onNavigate={(newDate: Date) => {
-                    if ("setValue" in (props.dateExpression ?? {})) {
-                        // @ts-expect-error: setValue may exist on runtime Mendix object
-                        props.dateExpression.setValue(newDate);
+    const components = useMemo(() => ({ 
+            week: {
+                header: CustomWeekHeader,
+                event: CustomWeekEvent
+            },
+            dateHeader: CustomMonthDateHeader,
+            month: {
+                event: (calendarEventProps: { event: CalEvent }) => (
+                <CustomMonthEvent
+                    {...calendarEventProps}
+                    onShowMoreClick={(date) => onShowMore([], date)}
+                    stableZone={stableZone}     
+                />
+                )
+            },
+            agenda: {
+                event: ({ event }: { event: CalEvent }) => {
+                    const template = (props as any).agendaEventTemplate;
+                    if (template && event.item) {
+                        return template.get(event.item);
                     }
-                }}
-                selectable={true}
-                onSelectSlot={handleSelectSlot} // empty space on calendar 
-                onSelectEvent={handleSelectEvent}
-                showMultiDayTimes={true}
-                // timeslots={1} // number of slots per "section" in the time grid views
-                // step={4} // selectable time increments 
-                messages={messages}
-                onShowMore={onShowMore}
-                popup={false}
-                drilldownView={null}
-                dayLayoutAlgorithm="no-overlap"
-                scrollToTime={new Date(1970, 1, 1, 6, 0, 0)} // Scroll to 6am, the date does not matter here, just need a date with the time that you want 
-                // longPressThreshold={120} // default is 250ms
-            />
+                    return <CustomWeekEvent event={event} />;
+                }
+            },
+            dateCellWrapper: DateCellWrapper, 
+    }), [stableZone, selectedDates, (props as any).agendaEventTemplate]);
+
+    return (
+        <div className={classnames(className)}>
+            {isProcessing ? (
+                <div className="calendar-loading-overlay">Loading Calendar...</div>
+            ) : ( 
+                <Calendar<CalEvent>
+                    key={`${locale ?? "default"}-${weekStartInt ?? "default"}`}
+                    localizer={localizer}
+                    events={finalEvents}
+                    getNow={getNow}
+                    defaultDate={defaultDate}
+                    culture={locale}
+                    startAccessor={(event: CalEvent) => event.start}
+                    endAccessor={(event: CalEvent) => event.end}
+                    views={viewsOption}
+                    allDayAccessor={(event: CalEvent) => event.allDay}
+                    eventPropGetter={eventPropGetter}
+                    components={components}
+                    formats={formats}
+                    toolbar={false}
+                    view={currentView ?? props.defaultView}
+                    date={props.dateExpression?.value ?? new Date()}
+                    onView={(newView: "month" | "week" | "quarter" | "day" | "agenda") => {
+                        props.viewAttribute?.setValue?.(newView);
+                    }}
+                    onNavigate={(newDate: Date) => {
+                        if ("setValue" in (props.dateExpression ?? {})) {
+                            // @ts-expect-error: setValue may exist on runtime Mendix object
+                            props.dateExpression.setValue(newDate);
+                        }
+                    }}
+                    selectable={true}
+                    onSelectSlot={handleSelectSlot} // clicking on calendar 
+                    showMultiDayTimes={true}
+                    // timeslots={1} // number of slots per "section" in the time grid views
+                    // step={4} // selectable time increments 
+                    messages={messages}
+                    onShowMore={onShowMore}
+                    popup={false}
+                    drilldownView={null}
+                    dayLayoutAlgorithm="no-overlap"
+                    // Set agenda length: 1 for 'day' view (as agenda), 7 for the standard 'agenda' view.
+                    length={rawView === 'day' ? 1 : 7}
+                    scrollToTime={scrollToTime}  
+                    // longPressThreshold={120} // default is 250ms
+                />
+            )}
         </div>
     );
 }
-
-
