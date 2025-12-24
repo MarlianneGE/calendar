@@ -175,7 +175,8 @@ export default function MxCalendar(props: CalendarContainerProps): ReactElement 
     const { class: className } = props;
 
     // currentView will be "month" if "quarter" is selected 
-    const rawView = props.viewAttribute?.value ?? props.defaultView;
+    const rawViewValue = props.viewAttribute?.value ?? props.defaultView;
+    const rawView = rawViewValue ? rawViewValue.toString().toLowerCase().trim() : "month";
 
     // When 'day' is selected, use the 'agenda' view to create a list view for that single day.
     // When 'quarter' is selected, use the 'month' view to show the quarter's months. 
@@ -571,6 +572,34 @@ function expandMultiDayEvents(
                 return originalStartOf(date, unit, culture);
             };
 
+            l.add = (date: Date, adder: number, unit: string) => {
+                const map: Record<string, string> = {
+                    year: 'years', month: 'months', week: 'weeks', day: 'days',
+                    hour: 'hours', minute: 'minutes', second: 'seconds', millisecond: 'milliseconds'
+                };
+                const luxonUnit = map[unit] || unit;
+                return DateTime.fromJSDate(date, { zone: stableZone })
+                    .plus({ [luxonUnit]: adder })
+                    .toJSDate();
+            };
+
+            l.range = (start: Date, end: Date, unit: string = 'day') => {
+                const range: Date[] = [];
+                let current = DateTime.fromJSDate(start, { zone: stableZone });
+                const endDT = DateTime.fromJSDate(end, { zone: stableZone });
+                const map: Record<string, string> = {
+                    year: 'years', month: 'months', week: 'weeks', day: 'days',
+                    hour: 'hours', minute: 'minutes', second: 'seconds', millisecond: 'milliseconds'
+                };
+                const luxonUnit = map[unit] || unit;
+
+                while (current < endDT) {
+                    range.push(current.toJSDate());
+                    current = current.plus({ [luxonUnit]: 1 });
+                }
+                return range;
+            };
+
             return {
                 defaultDate: getDate(defaultDateStr, DateTime),
                 getNow: () => DateTime.now().setZone(stableZone).toJSDate(),
@@ -615,13 +644,20 @@ function expandMultiDayEvents(
             dateCellWrapper: DateCellWrapper, 
     }), [stableZone, selectedDates, (props as any).agendaEventTemplate]);
 
+    // Normalize the date to the start of the day in the selected timezone
+    // This prevents the Agenda view (length=1) from spanning two days if the time is not 00:00
+    const calendarDate = useMemo(() => {
+        const rawDate = props.dateExpression?.value ?? new Date();
+        return DateTime.fromJSDate(rawDate, { zone: stableZone }).startOf("day").toJSDate();
+    }, [props.dateExpression?.value, stableZone]);
+
     return (
         <div className={classnames(className)}>
             {isProcessing ? (
                 <div className="calendar-loading-overlay">Loading Calendar...</div>
             ) : ( 
                 <Calendar<CalEvent>
-                    key={`${locale ?? "default"}-${weekStartInt ?? "default"}`}
+                    key={`${locale ?? "default"}-${weekStartInt ?? "default"}-${rawView}`}
                     localizer={localizer}
                     events={finalEvents}
                     getNow={getNow}
@@ -636,7 +672,7 @@ function expandMultiDayEvents(
                     formats={formats}
                     toolbar={false}
                     view={currentView ?? props.defaultView}
-                    date={props.dateExpression?.value ?? new Date()}
+                    date={calendarDate}
                     onView={(newView: "month" | "week" | "quarter" | "day" | "agenda") => {
                         props.viewAttribute?.setValue?.(newView);
                     }}
