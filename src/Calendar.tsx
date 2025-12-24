@@ -525,10 +525,23 @@ function expandMultiDayEvents(
         }
     };
 
-    // messages  
-    const messages = useMemo(() => ({
-        showMore: (total: number) => `+${total}`
-    }), []);
+    // Normalize the date to the start of the day in the selected timezone
+    // This prevents the Agenda view (length=1) from spanning two days if the time is not 00:00
+    const calendarDate = useMemo(() => {
+        const rawDate = props.dateExpression?.value ?? new Date();
+        return DateTime.fromJSDate(rawDate, { zone: stableZone }).startOf("day").toJSDate();
+    }, [props.dateExpression?.value, stableZone]);
+
+     // messages
+    const messages = useMemo(() => {
+        const dateLabel = DateTime.fromJSDate(calendarDate, { zone: stableZone })
+            .setLocale(locale ?? Settings.defaultLocale)
+            .toFormat("MMM dd, yyyy");
+        return {
+            showMore: (total: number) => `+${total}`,
+            noEventsInRange: `There are no events on ${dateLabel}.`
+        };
+    }, [calendarDate, stableZone, locale]);
 
     function onShowMore(_events: CalEvent[], date: Date): false {
         handleSelectSlot({ start: date, end: date });
@@ -560,16 +573,16 @@ function expandMultiDayEvents(
             }
 
             const l = luxonLocalizer(DateTime, { firstDayOfWeek: luxonFirstDayOfWeek });
-            const originalStartOf = l.startOf;
 
-            l.startOf = (date: Date, unit: string, culture?: any) => {
+            l.startOf = (date: Date, unit: string) => {
+                const dtObj = DateTime.fromJSDate(date, { zone: stableZone });
                 if (unit === 'week') {
-                    const dtObj = DateTime.fromJSDate(date, { zone: stableZone });
                     const weekday = dtObj.weekday;
                     const diff = (weekday - luxonFirstDayOfWeek + 7) % 7;
                     return dtObj.minus({ days: diff }).startOf('day').toJSDate();
                 }
-                return originalStartOf(date, unit, culture);
+                // Use stableZone for 'day', 'month' etc to ensure Agenda filters match the displayed date
+                return dtObj.startOf(unit as any).toJSDate();
             };
 
             l.add = (date: Date, adder: number, unit: string) => {
@@ -613,9 +626,21 @@ function expandMultiDayEvents(
         // Guard against processing during the switch
         if (isProcessing) return []; 
         
-        const expanded = expandMultiDayEvents(rawEvents, currentView, stableZone, quarterStartLuxon, quarterEndLuxon);
+        let filterStart = quarterStartLuxon;
+        let filterEnd = quarterEndLuxon;
+
+        // FIX: When in custom 'day' view, restrict events strictly to this day.
+        // This prevents RBC Agenda from seeing "tomorrow's" events (due to length=1 logic)
+        // and rendering an empty table instead of the "No events" message.
+        if (rawView === 'day') {
+             const dt = DateTime.fromJSDate(calendarDate, { zone: stableZone });
+             filterStart = dt.startOf('day');
+             filterEnd = dt.endOf('day');
+        }
+
+        const expanded = expandMultiDayEvents(rawEvents, currentView, stableZone, filterStart, filterEnd);
         return groupIconEventsByDay(expanded, currentView);
-    }, [rawEvents, currentView, stableZone, isProcessing]);
+    }, [rawEvents, currentView, stableZone, isProcessing, quarterStartLuxon, quarterEndLuxon, rawView, calendarDate]);
   
     const components = useMemo(() => ({ 
             week: {
@@ -643,13 +668,6 @@ function expandMultiDayEvents(
             },
             dateCellWrapper: DateCellWrapper, 
     }), [stableZone, selectedDates, (props as any).agendaEventTemplate]);
-
-    // Normalize the date to the start of the day in the selected timezone
-    // This prevents the Agenda view (length=1) from spanning two days if the time is not 00:00
-    const calendarDate = useMemo(() => {
-        const rawDate = props.dateExpression?.value ?? new Date();
-        return DateTime.fromJSDate(rawDate, { zone: stableZone }).startOf("day").toJSDate();
-    }, [props.dateExpression?.value, stableZone]);
 
     return (
         <div className={classnames(className)}>
